@@ -25,6 +25,17 @@ let MetricsService = class MetricsService {
         console.log(`Metrics Calculated: Total Change = ${totalChange}, Avg Velocity = ${avgVelocity}`);
         return { velocities, totalChange, avgVelocity };
     }
+    formatToInteger(price) {
+        if (price >= 1) {
+            return price;
+        }
+        else if (price > 0.0001) {
+            return Math.round(price * 1_000_0);
+        }
+        else {
+            return Math.round(price * 100_000_000);
+        }
+    }
 };
 exports.MetricsService = MetricsService;
 exports.MetricsService = MetricsService = __decorate([

@@ -24,4 +24,15 @@ export class MetricsService {
     );
     return { velocities, totalChange, avgVelocity };
   }
+
+  // Helper function to format prices to integers
+  formatToInteger(price: number) {
+    if (price >= 1) {
+      return price;
+    } else if (price > 0.0001) {
+      return Math.round(price * 1_000_0);
+    } else {
+      return Math.round(price * 100_000_000);
+    }
+  }
 }

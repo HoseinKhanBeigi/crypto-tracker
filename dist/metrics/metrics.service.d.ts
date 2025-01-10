@@ -4,4 +4,5 @@ export declare class MetricsService {
         totalChange: number;
         avgVelocity: number;
     };
+    formatToInteger(price: number): number;
 }

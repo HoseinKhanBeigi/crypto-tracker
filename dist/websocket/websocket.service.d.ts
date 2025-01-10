@@ -10,12 +10,9 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly symbols;
     private coinData;
     private timestamps;
-    private reconnectDelay;
     constructor(metricsService: MetricsService, notificationsService: NotificationsService, gateway: WebSocketGatewayService);
     onModuleInit(): void;
     onModuleDestroy(): void;
     private connectToBinance;
     private disconnectFromBinance;
-    private scheduleReconnect;
-    private handleMessage;
 }

@@ -18,27 +18,14 @@ const ws_1 = __importDefault(require("ws"));
 const metrics_service_1 = require("../metrics/metrics.service");
 const notifications_service_1 = require("../notifications/notifications.service");
 const websocket_gateway_1 = require("./websocket.gateway");
-function formatToInteger(price) {
-    if (price >= 1) {
-        return price;
-    }
-    else if (price > 0.0001) {
-        return Math.round(price * 1_000_0);
-    }
-    else {
-        return Math.round(price * 100_000_000);
-    }
-}
 let WebSocketService = class WebSocketService {
     constructor(metricsService, notificationsService, gateway) {
         this.metricsService = metricsService;
         this.notificationsService = notificationsService;
         this.gateway = gateway;
-        this.binanceWs = null;
         this.symbols = ['btcusdt', 'ethusdt', 'adausdt'];
         this.coinData = {};
         this.timestamps = {};
-        this.reconnectDelay = 5000;
     }
     onModuleInit() {
         this.connectToBinance();
@@ -51,60 +38,51 @@ let WebSocketService = class WebSocketService {
             .map((symbol) => `${symbol}@trade`)
             .join('/');
         const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
-        console.log(`Attempting to connect to Binance WebSocket: ${url}`);
+        console.log(`Connecting to Binance WebSocket: ${url}`);
         this.binanceWs = new ws_1.default(url);
         this.binanceWs.on('open', () => {
             console.log('Connected to Binance WebSocket.');
         });
         this.binanceWs.on('message', (data) => {
-            this.handleMessage(data.toString());
+            const parsed = JSON.parse(data.toString());
+            const stream = parsed.stream;
+            const symbol = stream.split('@')[0];
+            const trade = parsed.data;
+            const price = parseFloat(trade.p);
+            if (isNaN(price))
+                return;
+            const formattedPrice = this.metricsService.formatToInteger(price);
+            const now = Date.now();
+            if (!this.coinData[symbol]) {
+                this.coinData[symbol] = [];
+                this.timestamps[symbol] = now;
+            }
+            if (now - this.timestamps[symbol] >= 1000) {
+                this.timestamps[symbol] = now;
+                this.coinData[symbol].push(formattedPrice);
+                if (this.coinData[symbol].length >= 60) {
+                    const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
+                    console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
+                    if (Math.abs(metrics.avgVelocity) > 8) {
+                        this.notificationsService.sendLocalNotification(symbol, Math.abs(metrics.avgVelocity));
+                    }
+                    this.gateway.broadcast('price', { symbol, formattedPrice });
+                    this.coinData[symbol] = [];
+                }
+            }
         });
         this.binanceWs.on('error', (err) => {
             console.error('Binance WebSocket Error:', err.message);
         });
-        this.binanceWs.on('close', (code, reason) => {
-            console.warn(`Binance WebSocket closed. Code: ${code}, Reason: ${reason}`);
-            this.scheduleReconnect();
+        this.binanceWs.on('close', () => {
+            console.log('Binance WebSocket closed. Reconnecting...');
+            setTimeout(() => this.connectToBinance(), 5000);
         });
     }
     disconnectFromBinance() {
         if (this.binanceWs) {
             this.binanceWs.close();
             console.log('Disconnected from Binance WebSocket.');
-        }
-    }
-    scheduleReconnect() {
-        console.log(`Reconnecting to Binance WebSocket in ${this.reconnectDelay / 1000} seconds...`);
-        setTimeout(() => {
-            this.connectToBinance();
-        }, this.reconnectDelay);
-    }
-    handleMessage(message) {
-        const parsed = JSON.parse(message);
-        const stream = parsed.stream;
-        const symbol = stream.split('@')[0];
-        const trade = parsed.data;
-        const price = parseFloat(trade.p);
-        if (isNaN(price))
-            return;
-        const formattedPrice = formatToInteger(price);
-        const now = Date.now();
-        if (!this.coinData[symbol]) {
-            this.coinData[symbol] = [];
-            this.timestamps[symbol] = now;
-        }
-        if (now - this.timestamps[symbol] >= 1000) {
-            this.timestamps[symbol] = now;
-            this.coinData[symbol].push(formattedPrice);
-            if (this.coinData[symbol].length >= 60) {
-                const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
-                if (Math.abs(metrics.avgVelocity) > 8) {
-                    this.notificationsService.sendLocalNotification(symbol, metrics.avgVelocity);
-                }
-                this.gateway.broadcast('price', { symbol, formattedPrice });
-                this.coinData[symbol] = [];
-            }
         }
     }
 };
