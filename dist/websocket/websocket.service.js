@@ -60,10 +60,10 @@ let WebSocketService = class WebSocketService {
             if (now - this.timestamps[symbol] >= 1000) {
                 this.timestamps[symbol] = now;
                 this.coinData[symbol].push(formattedPrice);
-                if (this.coinData[symbol].length >= 30) {
+                if (this.coinData[symbol].length >= 40) {
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
                     console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
-                    if (Math.abs(metrics.avgVelocity) > 4) {
+                    if (Math.abs(metrics.avgVelocity) > 6) {
                         this.notificationsService.sendLocalNotification(symbol, Math.abs(metrics.avgVelocity));
                     }
                     this.gateway.broadcast('price', { symbol, formattedPrice });
