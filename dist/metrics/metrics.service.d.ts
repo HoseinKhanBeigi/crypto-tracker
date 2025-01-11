@@ -3,6 +3,10 @@ export declare class MetricsService {
         velocities: any[];
         totalChange: number;
         avgVelocity: number;
+    } | {
+        totalChange: number;
+        avgVelocity: number;
+        velocities?: undefined;
     };
     formatToInteger(price: number): number;
 }

@@ -23,7 +23,7 @@ let MetricsService = class MetricsService {
         const totalTime = data.length - 1;
         const avgVelocity = totalTime > 0 ? totalChange / totalTime : 0;
         console.log(`Metrics Calculated: Total Change = ${totalChange}, Avg Velocity = ${avgVelocity}`);
-        return { velocities, totalChange, avgVelocity };
+        return { totalChange, avgVelocity };
     }
     formatToInteger(price) {
         if (price >= 1) {

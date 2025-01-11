@@ -64,7 +64,12 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );
+
+          const freq = this.metricsService.classifyFrequency(
+            this.coinData[symbol],
+          );
           console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
+          console.log(`freq for ${symbol.toUpperCase()}:`, freq);
 
           if (Math.abs(metrics.avgVelocity) > 6) {
             this.notificationsService.sendLocalNotification(
