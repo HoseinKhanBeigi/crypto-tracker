@@ -60,7 +60,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
 
-        if (this.coinData[symbol].length >= 40) {
+        if (this.coinData[symbol].length >= 30) {
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );

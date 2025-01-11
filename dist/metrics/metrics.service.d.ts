@@ -9,4 +9,11 @@ export declare class MetricsService {
         velocities?: undefined;
     };
     formatToInteger(price: number): number;
+    classifyFrequency(numbers: any, thresholdPercentage?: number): {
+        status: any;
+        maxFrequency: number;
+        frequency: any;
+        threshold: number;
+        totalElements: any;
+    };
 }

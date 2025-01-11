@@ -60,9 +60,11 @@ let WebSocketService = class WebSocketService {
             if (now - this.timestamps[symbol] >= 1000) {
                 this.timestamps[symbol] = now;
                 this.coinData[symbol].push(formattedPrice);
-                if (this.coinData[symbol].length >= 40) {
+                if (this.coinData[symbol].length >= 30) {
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
+                    const freq = this.metricsService.classifyFrequency(this.coinData[symbol]);
                     console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
+                    console.log(`freq for ${symbol.toUpperCase()}:`, freq);
                     if (Math.abs(metrics.avgVelocity) > 6) {
                         this.notificationsService.sendLocalNotification(symbol, Math.abs(metrics.avgVelocity));
                     }

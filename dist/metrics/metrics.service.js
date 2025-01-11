@@ -36,6 +36,33 @@ let MetricsService = class MetricsService {
             return Math.round(price * 100_000_000);
         }
     }
+    classifyFrequency(numbers, thresholdPercentage = 50) {
+        const frequency = numbers.reduce((acc, num) => {
+            acc[num] = (acc[num] || 0) + 1;
+            return acc;
+        }, {});
+        const frequencies = Object.values(frequency);
+        const maxFrequency = Math.max(...frequencies);
+        const totalElements = numbers.length;
+        const threshold = (thresholdPercentage / 100) * totalElements;
+        let status;
+        if (maxFrequency > threshold) {
+            status = 'High Frequency';
+        }
+        else if (maxFrequency === 1) {
+            status = 'All Unique';
+        }
+        else {
+            status = 'Low Frequency';
+        }
+        return {
+            status,
+            maxFrequency,
+            frequency,
+            threshold,
+            totalElements,
+        };
+    }
 };
 exports.MetricsService = MetricsService;
 exports.MetricsService = MetricsService = __decorate([
