@@ -15,4 +15,5 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     onModuleDestroy(): void;
     private connectToBinance;
     private disconnectFromBinance;
+    private saveMetricsToFile;
 }
