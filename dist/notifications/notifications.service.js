@@ -18,7 +18,7 @@ let NotificationsService = class NotificationsService {
         node_notifier_1.default.notify({
             title: 'Crypto Tracker Alert',
             message,
-            sound: true,
+            sound: false,
             wait: false,
         });
         console.log(`Desktop notification sent: ${message}`);

@@ -8,7 +8,7 @@ export class NotificationsService {
     notifier.notify({
       title: 'Crypto Tracker Alert',
       message,
-      sound: true, // Play a sound
+      sound: false, // Play a sound
       wait: false, // Does not wait for user interaction
     });
     console.log(`Desktop notification sent: ${message}`);
