@@ -23,7 +23,7 @@ let WebSocketService = class WebSocketService {
         this.metricsService = metricsService;
         this.notificationsService = notificationsService;
         this.gateway = gateway;
-        this.symbols = ['btcusdt', 'ethusdt', 'adausdt'];
+        this.symbols = ['btcusdt'];
         this.coinData = {};
         this.timestamps = {};
     }
@@ -60,13 +60,13 @@ let WebSocketService = class WebSocketService {
             if (now - this.timestamps[symbol] >= 1000) {
                 this.timestamps[symbol] = now;
                 this.coinData[symbol].push(formattedPrice);
-                if (this.coinData[symbol].length >= 30) {
+                if (this.coinData[symbol].length >= 5) {
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
                     const freq = this.metricsService.classifyFrequency(this.coinData[symbol]);
                     console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
                     console.log(`freq for ${symbol.toUpperCase()}:`, freq);
-                    if (Math.abs(metrics.avgVelocity) > 6) {
-                        this.notificationsService.sendLocalNotification(symbol, Math.abs(metrics.avgVelocity));
+                    if (Math.abs(metrics.avgVelocity) > 4.5) {
+                        this.notificationsService.sendLocalNotification(symbol, metrics.avgVelocity);
                     }
                     this.gateway.broadcast('price', { symbol, formattedPrice });
                     this.coinData[symbol] = [];

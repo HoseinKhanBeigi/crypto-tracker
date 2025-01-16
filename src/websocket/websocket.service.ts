@@ -7,7 +7,7 @@ import { WebSocketGatewayService } from './websocket.gateway';
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private binanceWs: WebSocket;
-  private readonly symbols = ['btcusdt', 'ethusdt', 'adausdt'];
+  private readonly symbols = ['btcusdt'];
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
 
@@ -60,7 +60,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
 
-        if (this.coinData[symbol].length >= 30) {
+        if (this.coinData[symbol].length >= 5) {
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );
@@ -71,10 +71,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
           console.log(`freq for ${symbol.toUpperCase()}:`, freq);
 
-          if (Math.abs(metrics.avgVelocity) > 6) {
+          if (Math.abs(metrics.avgVelocity) > 4.5) {
             this.notificationsService.sendLocalNotification(
               symbol,
-              Math.abs(metrics.avgVelocity),
+              metrics.avgVelocity,
             );
           }
 
