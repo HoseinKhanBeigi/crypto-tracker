@@ -58,7 +58,36 @@ let WebSocketService = class WebSocketService {
         this.metricsService = metricsService;
         this.notificationsService = notificationsService;
         this.gateway = gateway;
-        this.symbols = ['btcusdt'];
+        this.symbols = [
+            'btcusdt',
+            'dogeusdt',
+            'xrpusdt',
+            'rsrusdt',
+            'pnutusdt',
+            'adausdt',
+            'galausdt',
+            'egldusdt',
+            'dotusdt',
+            'grtusdt',
+            'uniusdt',
+            'sklusdt',
+            'cakeusdt',
+            'vetusdt',
+            'solusdt',
+            'cotiusdt',
+            'icpusdt',
+            'cfxusdt',
+            'polusdt',
+            'zetausdt',
+            'sushiusdt',
+            'bobusdt',
+            'peopleusdt',
+            'arbusdt',
+            'shibusdt',
+            'flokiusdt',
+            'pepeusdt',
+            '1mbabydogeusdt',
+        ];
         this.coinData = {};
         this.timestamps = {};
     }
@@ -99,8 +128,6 @@ let WebSocketService = class WebSocketService {
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
                     const freq = this.metricsService.classifyFrequency(this.coinData[symbol]);
                     console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
-                    console.log(`Frequency for ${symbol.toUpperCase()}:`, freq);
-                    this.saveMetricsToFile(symbol, metrics, freq);
                     if (Math.abs(metrics.avgVelocity) > 4.5) {
                         this.notificationsService.sendLocalNotification(symbol, metrics.avgVelocity);
                     }

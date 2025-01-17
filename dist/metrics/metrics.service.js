@@ -9,28 +9,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetricsService = void 0;
 const common_1 = require("@nestjs/common");
 let MetricsService = class MetricsService {
-    calculateMetrics(data) {
-        if (data.length < 2) {
-            return { velocities: [], totalChange: 0, avgVelocity: 0 };
-        }
+    constructor() {
+        this.removeZeros = (input) => {
+            const result = input.replace(/^0+|\.0+|(\.)(0+)/g, '').replace('.', '');
+            return result;
+        };
+    }
+    calculateMetrics(data, dt = 1) {
+        let totalVelocity = 0;
+        let totalAcceleration = 0;
+        let totalJerk = 0;
         const velocities = [];
-        let totalChange = 0;
+        const accelerations = [];
+        const jerks = [];
         for (let i = 0; i < data.length - 1; i++) {
-            const change = data[i + 1] - data[i];
-            velocities.push(change);
-            totalChange += change;
+            const v = (data[i + 1] - data[i]) / dt;
+            velocities.push(v);
+            totalVelocity += v;
+            if (i > 0) {
+                const a = (velocities[i] - velocities[i - 1]) / dt;
+                accelerations.push(a);
+                totalAcceleration += a;
+                if (i > 1) {
+                    const j = (accelerations[i - 1] - accelerations[i - 2]) / dt;
+                    jerks.push(j);
+                    totalJerk += j;
+                }
+            }
         }
-        const totalTime = data.length - 1;
-        const avgVelocity = totalTime > 0 ? totalChange / totalTime : 0;
-        console.log(`Metrics Calculated: Total Change = ${totalChange}, Avg Velocity = ${avgVelocity}`);
-        return { totalChange, avgVelocity };
+        const avgVelocity = totalVelocity / velocities.length || 0;
+        const avgAcceleration = totalAcceleration / accelerations.length || 0;
+        const avgJerk = totalJerk / jerks.length || 0;
+        return {
+            avgVelocity,
+            avgAcceleration,
+            avgJerk,
+            totalVelocity,
+            totalAcceleration,
+            totalJerk,
+        };
     }
     formatToInteger(price) {
         if (price >= 1) {
             return price;
         }
-        else if (price > 0.0001) {
-            return Math.round(price * 1_000_0);
+        else if (price > 0.001) {
+            return Math.round(price * 100_000);
         }
         else {
             return Math.round(price * 100_000_000);

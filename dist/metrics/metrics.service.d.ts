@@ -1,13 +1,13 @@
 export declare class MetricsService {
-    calculateMetrics(data: number[]): {
-        velocities: any[];
-        totalChange: number;
+    calculateMetrics(data: number[], dt?: number): {
         avgVelocity: number;
-    } | {
-        totalChange: number;
-        avgVelocity: number;
-        velocities?: undefined;
+        avgAcceleration: number;
+        avgJerk: number;
+        totalVelocity: number;
+        totalAcceleration: number;
+        totalJerk: number;
     };
+    removeZeros: (input: any) => any;
     formatToInteger(price: number): number;
     classifyFrequency(numbers: any, thresholdPercentage?: number): {
         status: any;
