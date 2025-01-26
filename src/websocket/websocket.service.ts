@@ -3,42 +3,12 @@ import WebSocket from 'ws';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from './websocket.gateway';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private binanceWs: WebSocket;
-  private readonly symbols = [
-    'btcusdt',
-    'dogeusdt',
-    'xrpusdt',
-    'rsrusdt',
-    'pnutusdt',
-    'adausdt',
-    'galausdt',
-    'egldusdt',
-    'dotusdt',
-    'grtusdt',
-    'uniusdt',
-    'sklusdt',
-    'cakeusdt',
-    'vetusdt',
-    'solusdt',
-    'cotiusdt',
-    'icpusdt',
-    'cfxusdt',
-    'polusdt',
-    'zetausdt',
-    'sushiusdt',
-    'bobusdt',
-    'peopleusdt',
-    'arbusdt',
-    'shibusdt',
-    'flokiusdt',
-    'pepeusdt',
-    '1mbabydogeusdt',
-  ];
+
+  private readonly symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
 
@@ -47,13 +17,12 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly notificationsService: NotificationsService,
     private readonly gateway: WebSocketGatewayService,
   ) {}
+  onModuleDestroy() {
+    throw new Error('Method not implemented.');
+  }
 
   onModuleInit() {
     this.connectToBinance();
-  }
-
-  onModuleDestroy() {
-    this.disconnectFromBinance();
   }
 
   private connectToBinance() {
@@ -107,13 +76,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           // Save metrics and frequency to a file
           // this.saveMetricsToFile(symbol, metrics, freq);
 
-          if (Math.abs(metrics.avgVelocity) > 4.5) {
-            this.notificationsService.sendLocalNotification(
-              symbol,
-              metrics.avgVelocity,
-            );
-          }
-
           this.gateway.broadcast('price', { symbol, formattedPrice });
           this.coinData[symbol] = [];
         }
@@ -128,38 +90,5 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       console.log('Binance WebSocket closed. Reconnecting...');
       setTimeout(() => this.connectToBinance(), 5000);
     });
-  }
-
-  private disconnectFromBinance() {
-    if (this.binanceWs) {
-      this.binanceWs.close();
-      console.log('Disconnected from Binance WebSocket.');
-    }
-  }
-
-  private saveMetricsToFile(symbol: string, metrics: any, freq: any) {
-    const logFilePath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'logs',
-      `${symbol}-metrics.json`,
-    );
-    const logData = {
-      timestamp: new Date().toISOString(),
-      metrics,
-      freq,
-    };
-
-    try {
-      // Ensure the logs directory exists
-      fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
-
-      // Append metrics and frequency to the log file
-      fs.appendFileSync(logFilePath, JSON.stringify(logData) + '\n', 'utf-8');
-      console.log(`Metrics and frequency saved to ${logFilePath}`);
-    } catch (error) {
-      console.error('Error saving metrics to file:', error.message);
-    }
   }
 }

@@ -25,10 +25,12 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-socket.io": "^10.4.15",
     "@nestjs/websockets": "^10.4.15",
+    "axios": "^1.7.9",
     "node-notifier": "^10.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
+    "telegram": "^2.26.16",
     "websocket": "^1.0.35",
     "ws": "^8.18.0"
   },
