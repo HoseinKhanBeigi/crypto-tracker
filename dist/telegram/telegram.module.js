@@ -19,7 +19,7 @@ exports.TelegramModule = TelegramModule = __decorate([
     (0, common_1.Module)({
         imports: [
             metrics_module_1.MetricsModule,
-            websocket_module_1.WebSocketModule,
+            (0, common_1.forwardRef)(() => websocket_module_1.WebSocketModule),
         ],
         controllers: [telegram_controller_1.TelegramController],
         providers: [telegram_service_1.TelegramService],

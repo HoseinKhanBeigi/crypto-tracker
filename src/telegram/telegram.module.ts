@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { TelegramController } from './telegram.controller';
 import { MetricsModule } from '../metrics/metrics.module';
@@ -7,7 +7,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
 @Module({
   imports: [
     MetricsModule,
-    WebSocketModule,
+    forwardRef(() => WebSocketModule),
   ],
   controllers: [TelegramController],
   providers: [TelegramService],

@@ -21,7 +21,7 @@ exports.WebSocketModule = WebSocketModule = __decorate([
         imports: [
             metrics_module_1.MetricsModule,
             notifications_module_1.NotificationsModule,
-            telegram_module_1.TelegramModule
+            (0, common_1.forwardRef)(() => telegram_module_1.TelegramModule)
         ],
         providers: [websocket_gateway_1.WebSocketGatewayService, websocket_service_1.WebSocketService],
         exports: [websocket_service_1.WebSocketService],
