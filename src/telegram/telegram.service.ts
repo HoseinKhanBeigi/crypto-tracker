@@ -1,5 +1,4 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-
 import axios from 'axios';
 
 @Injectable()
@@ -17,17 +16,31 @@ export class TelegramService implements OnModuleInit {
 
   // Set the Telegram bot webhook
   private async setWebhook(url: string): Promise<void> {
-    await axios.post(`${this.telegramApiUrl}/setWebhook`, {
-      url,
-    });
-    console.log(`Webhook set to: ${url}`);
+    try {
+      await axios.post(`${this.telegramApiUrl}/setWebhook`, {
+        url,
+      });
+      console.log(`Webhook set to: ${url}`);
+    } catch (error) {
+      console.error('Failed to set webhook:', error.message);
+    }
   }
 
   // Send a message to a chat
   async sendMessage(chatId: string | number, text: string): Promise<void> {
-    await axios.post(`${this.telegramApiUrl}/sendMessage`, {
-      chat_id: chatId,
-      text,
-    });
+    try {
+      await axios.post(`${this.telegramApiUrl}/sendMessage`, {
+        chat_id: chatId,
+        text,
+      });
+      console.log('Message sent successfully to chat:', chatId);
+    } catch (error) {
+      console.error('Failed to send message:', error.message);
+    }
+  }
+
+  // Handle the /start command
+  async handleStartCommand(chatId: string | number): Promise<void> {
+    await this.sendMessage(chatId, 'Welcome to your Telegram bot!');
   }
 }

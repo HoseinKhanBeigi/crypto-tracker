@@ -6,21 +6,17 @@ export class TelegramController {
   constructor(private readonly telegramService: TelegramService) {}
 
   @Post('webhook')
-  async handleWebhook(@Body() update: any): Promise<void> {
-    console.log('Received update:', update);
+  async handleWebhook(@Body() update: any) {
+    // Check if it's a message and contains text
+    if (update.message?.text) {
+      const chatId = update.message.chat.id;
+      const text = update.message.text;
 
-    const message = update.message?.text; // Extract message text
-    const chatId = update.message?.chat.id; // Extract chat ID
-
-    if (message && chatId) {
-      if (message.startsWith('/start')) {
-        await this.telegramService.sendMessage(
-          chatId,
-          'Welcome to your Telegram bot!',
-        );
-      } else {
-        await this.telegramService.sendMessage(chatId, `You said: ${message}`);
+      // Handle /start command
+      if (text === '/start') {
+        await this.telegramService.handleStartCommand(chatId);
       }
     }
+    return { ok: true };
   }
 }
