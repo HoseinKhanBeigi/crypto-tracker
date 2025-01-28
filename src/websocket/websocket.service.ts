@@ -34,8 +34,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     const endpoints = [
      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
-      // `wss://fstream.binance.com/stream?streams=${streamNames}`,
-      // `wss://dstream.binance.com/stream?streams=${streamNames}`
+      `wss://fstream.binance.com/stream?streams=${streamNames}`,
+      `wss://dstream.binance.com/stream?streams=${streamNames}`
     ];
 
     const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
