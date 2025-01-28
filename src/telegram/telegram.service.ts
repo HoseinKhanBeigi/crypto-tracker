@@ -68,8 +68,8 @@ export class TelegramService implements OnModuleInit {
       const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
 
-Average Velocity: ${metrics.avgVelocity?.toFixed(2) || 'N/A'}
-Standard Deviation: ${metrics.stdDev?.toFixed(2) || 'N/A'}
+Average Velocity: ${metrics.avgVelocity || 'N/A'}
+Standard Deviation: ${metrics.stdDev || 'N/A'}
 Min Price: ${metrics.min || 'N/A'}
 Max Price: ${metrics.max || 'N/A'}
 Price Range: ${metrics.range || 'N/A'}
