@@ -69,16 +69,16 @@ export class TelegramService implements OnModuleInit {
 
     try {
       const message = `
-📊 Metrics for ${symbol.toUpperCase()}:
-
-Average Velocity: ${metrics.avgVelocity}
-Standard Deviation: ${metrics.stdDev}
-Min Price: ${metrics.min}
-Max Price: ${metrics.max}
-Price Range: ${metrics.range}
+📊 ${symbol.toUpperCase()} Update:
+📈 Avg Velocity: $${(metrics.avgVelocity / 100).toFixed(2)}
+🚀 Avg Acceleration: $${(metrics.avgAcceleration / 100).toFixed(2)}
+💫 Avg Jerk: $${(metrics.avgJerk / 100).toFixed(2)}
+📊 Total Velocity: $${(metrics.totalVelocity / 100).toFixed(2)}
 `;
 
+      console.log('📤 Sending formatted message:', message);
       await this.sendMessage(193418752, message);
+      console.log('✅ Message sent successfully');
     } catch (error) {
       console.error('❌ Failed to send metrics update:', error);
       if (error.response) {

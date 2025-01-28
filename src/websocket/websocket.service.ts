@@ -65,11 +65,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       this.binanceWs.on('message', async (data) => {
         try {
           const parsed = JSON.parse(data.toString());
-          console.log('📥 Received message:', parsed);
 
           if (!parsed.data) {
-            console.log('⏭️ Skipping non-trade message');
-            return;
+            return; // Skip non-trade messages
           }
 
           const stream = parsed.stream;
@@ -82,8 +80,17 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             return;
           }
 
-          const formattedPrice = this.metricsService.formatToInteger(price);
-          console.log(`💰 ${symbol}: Price = ${formattedPrice}`);
+          // Format price correctly based on symbol
+          let formattedPrice = price;
+          if (symbol === 'dogeusdt') {
+            formattedPrice = price * 100000; // Convert to smaller unit for DOGE
+          } else if (symbol === 'btcusdt') {
+            formattedPrice = price; // Keep BTC price as is
+          } else if (symbol === 'xrpusdt') {
+            formattedPrice = price * 1000; // Convert to smaller unit for XRP
+          }
+
+          console.log(`💰 ${symbol}: Original Price = ${price}, Formatted = ${formattedPrice}`);
 
           const now = Date.now();
 
@@ -100,7 +107,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
             if (this.coinData[symbol].length >= 10) {
               console.log(`🧮 Starting metrics calculation for ${symbol}...`);
-              console.log(`Data points:`, this.coinData[symbol]);
+              console.log(`Raw data points for ${symbol}:`, this.coinData[symbol]);
               
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
@@ -110,8 +117,12 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               this.latestMetrics[symbol] = metrics;
 
               try {
-                console.log(`📤 Attempting to send metrics to Telegram...`);
-                console.log(`Using chat ID: 193418752`);
+                const message = `
+📊 ${symbol.toUpperCase()} Update:
+💵 Current Price: $${price}
+📈 Average: $${(metrics.avgVelocity / 100).toFixed(2)}
+`;
+                console.log(`📤 Sending message to Telegram:`, message);
                 await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
                 console.log(`✅ Metrics sent to Telegram successfully`);
               } catch (error) {
