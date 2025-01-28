@@ -31,10 +31,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       .map((symbol) => `${symbol}@trade`)
       .join('/');
 
-    // Try alternative endpoints
     const endpoints = [
-      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       `wss://stream.binance.us:9443/stream?streams=${streamNames}`,
+      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       `wss://fstream.binance.com/stream?streams=${streamNames}`,
       `wss://dstream.binance.com/stream?streams=${streamNames}`
     ];
@@ -52,30 +51,40 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
       this.binanceWs.on('open', () => {
         console.log('✅ Connected to Binance WebSocket');
-        this.reconnectAttempts = 0; // Reset attempts on successful connection
+        this.reconnectAttempts = 0;
         
-        // Subscribe to streams
         const subscribeMsg = {
           method: 'SUBSCRIBE',
           params: this.symbols.map(symbol => `${symbol}@trade`),
           id: 1
         };
         this.binanceWs.send(JSON.stringify(subscribeMsg));
+        console.log('📨 Sent subscription message:', subscribeMsg);
       });
 
       this.binanceWs.on('message', async (data) => {
         try {
           const parsed = JSON.parse(data.toString());
-          if (!parsed.data) return; // Skip non-trade messages
+          console.log('📥 Received message:', parsed);
+
+          if (!parsed.data) {
+            console.log('⏭️ Skipping non-trade message');
+            return;
+          }
 
           const stream = parsed.stream;
           const symbol = stream.split('@')[0];
           const trade = parsed.data;
 
           const price = parseFloat(trade.p);
-          if (isNaN(price)) return;
+          if (isNaN(price)) {
+            console.log('⚠️ Invalid price:', trade.p);
+            return;
+          }
 
           const formattedPrice = this.metricsService.formatToInteger(price);
+          console.log(`💰 ${symbol}: Price = ${formattedPrice}`);
+
           const now = Date.now();
 
           if (!this.coinData[symbol]) {
@@ -86,6 +95,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           if (now - this.timestamps[symbol] >= 1000) {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
+            console.log(`📊 ${symbol}: Data points collected: ${this.coinData[symbol].length}/50`);
 
             if (this.coinData[symbol].length >= 50) {
               console.log(`🧮 Calculating metrics for ${symbol}...`);
@@ -94,6 +104,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               );
               
               this.latestMetrics[symbol] = metrics;
+              console.log(`📈 Metrics calculated:`, metrics);
 
               try {
                 console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
