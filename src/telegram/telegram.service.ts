@@ -78,7 +78,7 @@ Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
 
-      await this.sendMessage(chatId, message);
+      await this.sendMessage(193418752, message);
     } catch (error) {
       console.error('❌ Failed to send metrics update:', error);
       if (error.response) {
@@ -89,8 +89,8 @@ Price Range: ${metrics.range}
 
   // Modify the existing handleStartCommand to include metrics info
   async handleStartCommand(chatId: string | number): Promise<void> {
-    console.log('🎬 Handling /start command for chat:', chatId);
+    console.log('🎬 Handling /start command for chat:', 193418752);
     const message = `Welcome! You will receive crypto metrics updates in this chat.`;
-    await this.sendMessage(chatId, message);
+    await this.sendMessage(193418752, message);
   }
 }
