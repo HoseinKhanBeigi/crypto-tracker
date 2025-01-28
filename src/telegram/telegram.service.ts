@@ -5,29 +5,25 @@ import axios from 'axios';
 export class TelegramService implements OnModuleInit {
   private readonly botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU'; // Your BotFather token
   private readonly telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
+  private readonly defaultChatId = 'YOUR_CHAT_ID_HERE'; // Add this after you get your chat ID
 
   async onModuleInit() {
     console.log('🤖 TelegramService initializing...');
-    // Make sure this URL matches your actual Vercel deployment URL
-    const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
     
-    // First, delete any existing webhook
+    // First, delete existing webhook and get updates
     try {
       await axios.post(`${this.telegramApiUrl}/deleteWebhook`);
       console.log('✅ Old webhook deleted');
+      
+      // Get any pending updates to see chat ID
+      const updates = await axios.get(`${this.telegramApiUrl}/getUpdates`);
+      console.log('📱 Updates:', JSON.stringify(updates.data, null, 2));
+      
+      // Then set up your webhook
+      const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
+      await this.setWebhook(webhookUrl);
     } catch (error) {
-      console.error('❌ Error deleting webhook:', error.message);
-    }
-
-    // Set new webhook
-    await this.setWebhook(webhookUrl);
-    
-    // Verify webhook
-    try {
-      const webhookInfo = await axios.get(`${this.telegramApiUrl}/getWebhookInfo`);
-      console.log('📡 Current webhook info:', webhookInfo.data);
-    } catch (error) {
-      console.error('❌ Error getting webhook info:', error.message);
+      console.error('❌ Error:', error.message);
     }
   }
 
@@ -75,8 +71,8 @@ Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
 
-      // Use provided chatId or fall back to environment variable
-      const targetChatId = chatId || process.env.TELEGRAM_CHAT_ID;
+      // Use provided chatId, or defaultChatId, or environment variable
+      const targetChatId = chatId || this.defaultChatId || process.env.TELEGRAM_CHAT_ID;
       console.log(`🔍 Using chat ID:`, targetChatId);
 
       if (!targetChatId) {

@@ -16,24 +16,20 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
+        this.defaultChatId = 'YOUR_CHAT_ID_HERE';
     }
     async onModuleInit() {
         console.log('🤖 TelegramService initializing...');
-        const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
         try {
             await axios_1.default.post(`${this.telegramApiUrl}/deleteWebhook`);
             console.log('✅ Old webhook deleted');
+            const updates = await axios_1.default.get(`${this.telegramApiUrl}/getUpdates`);
+            console.log('📱 Updates:', JSON.stringify(updates.data, null, 2));
+            const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
+            await this.setWebhook(webhookUrl);
         }
         catch (error) {
-            console.error('❌ Error deleting webhook:', error.message);
-        }
-        await this.setWebhook(webhookUrl);
-        try {
-            const webhookInfo = await axios_1.default.get(`${this.telegramApiUrl}/getWebhookInfo`);
-            console.log('📡 Current webhook info:', webhookInfo.data);
-        }
-        catch (error) {
-            console.error('❌ Error getting webhook info:', error.message);
+            console.error('❌ Error:', error.message);
         }
     }
     async setWebhook(url) {
@@ -75,7 +71,7 @@ Min Price: ${metrics.min}
 Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
-            const targetChatId = chatId || process.env.TELEGRAM_CHAT_ID;
+            const targetChatId = chatId || this.defaultChatId || process.env.TELEGRAM_CHAT_ID;
             console.log(`🔍 Using chat ID:`, targetChatId);
             if (!targetChatId) {
                 console.error('❌ No chat ID available');
