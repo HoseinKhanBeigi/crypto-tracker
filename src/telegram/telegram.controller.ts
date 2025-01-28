@@ -66,7 +66,7 @@ export class TelegramController {
             console.log('📊 Got metrics:', metrics);
             
             if (metrics) {
-              await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+              await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
               console.log('✅ Metrics sent successfully');
             } else {
               await this.telegramService.sendMessage(chatId, 'No metrics available yet. Please wait a moment and try again.');
