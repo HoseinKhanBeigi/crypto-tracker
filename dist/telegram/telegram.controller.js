@@ -42,12 +42,12 @@ let TelegramController = TelegramController_1 = class TelegramController {
                     case '/start':
                         this.logger.log('🎬 Received /start command');
                         try {
-                            await this.telegramService.handleStartCommand(chatId);
+                            await this.telegramService.handleStartCommand(193418752);
                             console.log('✅ Welcome message sent successfully');
                             const metrics = this.webSocketService.getLatestMetrics();
                             console.log('📊 Got metrics:', metrics);
                             if (metrics) {
-                                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+                                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
                                 console.log('✅ Metrics sent successfully');
                             }
                         }
@@ -63,7 +63,7 @@ let TelegramController = TelegramController_1 = class TelegramController {
                         const metrics = this.webSocketService.getLatestMetrics();
                         console.log('📊 Got metrics:', metrics);
                         if (metrics) {
-                            await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+                            await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
                             console.log('✅ Metrics sent successfully');
                         }
                         else {

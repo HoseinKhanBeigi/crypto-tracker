@@ -80,7 +80,7 @@ Min Price: ${metrics.min}
 Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
-            await this.sendMessage(chatId, message);
+            await this.sendMessage(193418752, message);
         }
         catch (error) {
             console.error('❌ Failed to send metrics update:', error);
@@ -90,9 +90,9 @@ Price Range: ${metrics.range}
         }
     }
     async handleStartCommand(chatId) {
-        console.log('🎬 Handling /start command for chat:', chatId);
+        console.log('🎬 Handling /start command for chat:', 193418752);
         const message = `Welcome! You will receive crypto metrics updates in this chat.`;
-        await this.sendMessage(chatId, message);
+        await this.sendMessage(193418752, message);
     }
 };
 exports.TelegramService = TelegramService;

@@ -8,11 +8,12 @@ import { TelegramService } from '../telegram/telegram.service';
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private binanceWs: WebSocket;
-
   private readonly symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
   private latestMetrics: Record<string, any> = {};
+  private reconnectAttempts = 0;
+  private readonly maxReconnectAttempts = 5;
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -29,67 +30,116 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     const streamNames = this.symbols
       .map((symbol) => `${symbol}@trade`)
       .join('/');
-    const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
-    console.log(`🔌 Connecting to Binance WebSocket: ${url}`);
 
-    this.binanceWs = new WebSocket(url);
+    // Try alternative endpoints
+    const endpoints = [
+      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
+      `wss://stream.binance.us:9443/stream?streams=${streamNames}`,
+      `wss://fstream.binance.com/stream?streams=${streamNames}`,
+      `wss://dstream.binance.com/stream?streams=${streamNames}`
+    ];
 
-    this.binanceWs.on('open', () => {
-      console.log('✅ Connected to Binance WebSocket');
-    });
+    const endpoint = endpoints[this.reconnectAttempts % endpoints.length];
+    console.log(`🔌 Connecting to Binance WebSocket: ${endpoint}`);
 
-    this.binanceWs.on('message', async (data) => {
-      const parsed = JSON.parse(data.toString());
-      const stream = parsed.stream;
-      const symbol = stream.split('@')[0];
-      const trade = parsed.data;
+    try {
+      this.binanceWs = new WebSocket(endpoint, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        timeout: 30000,
+      });
 
-      const price = parseFloat(trade.p);
-      if (isNaN(price)) return;
+      this.binanceWs.on('open', () => {
+        console.log('✅ Connected to Binance WebSocket');
+        this.reconnectAttempts = 0; // Reset attempts on successful connection
+        
+        // Subscribe to streams
+        const subscribeMsg = {
+          method: 'SUBSCRIBE',
+          params: this.symbols.map(symbol => `${symbol}@trade`),
+          id: 1
+        };
+        this.binanceWs.send(JSON.stringify(subscribeMsg));
+      });
 
-      const formattedPrice = this.metricsService.formatToInteger(price);
-      const now = Date.now();
+      this.binanceWs.on('message', async (data) => {
+        try {
+          const parsed = JSON.parse(data.toString());
+          if (!parsed.data) return; // Skip non-trade messages
 
-      if (!this.coinData[symbol]) {
-        this.coinData[symbol] = [];
-        this.timestamps[symbol] = now;
-      }
+          const stream = parsed.stream;
+          const symbol = stream.split('@')[0];
+          const trade = parsed.data;
 
-      if (now - this.timestamps[symbol] >= 1000) {
-        this.timestamps[symbol] = now;
-        this.coinData[symbol].push(formattedPrice);
+          const price = parseFloat(trade.p);
+          if (isNaN(price)) return;
 
-        if (this.coinData[symbol].length >= 50) {
-          console.log(`🧮 Calculating metrics for ${symbol}...`);
-          const metrics = this.metricsService.calculateMetrics(
-            this.coinData[symbol],
-          );
-          
-          this.latestMetrics[symbol] = metrics;
+          const formattedPrice = this.metricsService.formatToInteger(price);
+          const now = Date.now();
 
-          try {
-            console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-            await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
-            console.log(`✅ Metrics sent to Telegram successfully`);
-          } catch (error) {
-            console.error(`❌ Failed to send metrics to Telegram:`, error);
+          if (!this.coinData[symbol]) {
+            this.coinData[symbol] = [];
+            this.timestamps[symbol] = now;
           }
 
-          this.gateway.broadcast('price', { symbol, formattedPrice });
-          this.coinData[symbol] = [];
-          console.log(`🔄 Reset data collection for ${symbol}`);
+          if (now - this.timestamps[symbol] >= 1000) {
+            this.timestamps[symbol] = now;
+            this.coinData[symbol].push(formattedPrice);
+
+            if (this.coinData[symbol].length >= 50) {
+              console.log(`🧮 Calculating metrics for ${symbol}...`);
+              const metrics = this.metricsService.calculateMetrics(
+                this.coinData[symbol],
+              );
+              
+              this.latestMetrics[symbol] = metrics;
+
+              try {
+                console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
+                await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
+                console.log(`✅ Metrics sent to Telegram successfully`);
+              } catch (error) {
+                console.error(`❌ Failed to send metrics to Telegram:`, error);
+              }
+
+              this.gateway.broadcast('price', { symbol, formattedPrice });
+              this.coinData[symbol] = [];
+              console.log(`🔄 Reset data collection for ${symbol}`);
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error processing message:', error);
         }
+      });
+
+      this.binanceWs.on('error', (err) => {
+        console.error('❌ Binance WebSocket Error:', err.message);
+        this.reconnectAttempts++;
+        
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+          setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
+        } else {
+          console.error('❌ Max reconnection attempts reached');
+        }
+      });
+
+      this.binanceWs.on('close', () => {
+        console.log('🔄 Binance WebSocket closed.');
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+          setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to create WebSocket connection:', error);
+      this.reconnectAttempts++;
+      if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
       }
-    });
-
-    this.binanceWs.on('error', (err) => {
-      console.error('❌ Binance WebSocket Error:', err.message);
-    });
-
-    this.binanceWs.on('close', () => {
-      console.log('🔄 Binance WebSocket closed. Reconnecting...');
-      setTimeout(() => this.connectToBinance(), 5000);
-    });
+    }
   }
 
   onModuleDestroy() {
