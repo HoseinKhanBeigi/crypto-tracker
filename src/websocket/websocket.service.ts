@@ -19,11 +19,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly gateway: WebSocketGatewayService,
     private readonly telegramService: TelegramService,
   ) {}
-  onModuleDestroy() {
-    throw new Error('Method not implemented.');
-  }
 
   onModuleInit() {
+    console.log('🚀 WebSocket Service initializing...');
     this.connectToBinance();
   }
 
@@ -32,12 +30,12 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       .map((symbol) => `${symbol}@trade`)
       .join('/');
     const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
-    console.log(`Connecting to Binance WebSocket: ${url}`);
+    console.log(`🔌 Connecting to Binance WebSocket: ${url}`);
 
     this.binanceWs = new WebSocket(url);
 
     this.binanceWs.on('open', () => {
-      console.log('Connected to Binance WebSocket.');
+      console.log('✅ Connected to Binance WebSocket');
     });
 
     this.binanceWs.on('message', async (data) => {
@@ -53,6 +51,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       const now = Date.now();
 
       if (!this.coinData[symbol]) {
+        console.log(`📊 Initializing data collection for ${symbol}`);
         this.coinData[symbol] = [];
         this.timestamps[symbol] = now;
       }
@@ -60,18 +59,18 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       if (now - this.timestamps[symbol] >= 1000) {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
+        console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
 
         if (this.coinData[symbol].length >= 50) {
-          console.log(`📊 Calculating metrics for ${symbol}...`);
+          console.log(`🧮 Calculating metrics for ${symbol}...`);
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );
           
-          console.log(`✅ Metrics calculated:`, metrics);
+          console.log(`✅ Metrics calculated for ${symbol}:`, metrics);
 
           try {
-            // Send metrics to Telegram
-            console.log(`📤 Attempting to send metrics to Telegram for ${symbol}...`);
+            console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
             await this.telegramService.sendMetricsUpdate(symbol, metrics);
             console.log(`✅ Metrics sent to Telegram successfully`);
           } catch (error) {
@@ -80,17 +79,25 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
           this.gateway.broadcast('price', { symbol, formattedPrice });
           this.coinData[symbol] = [];
+          console.log(`🔄 Reset data collection for ${symbol}`);
         }
       }
     });
 
     this.binanceWs.on('error', (err) => {
-      console.error('Binance WebSocket Error:', err.message);
+      console.error('❌ Binance WebSocket Error:', err.message);
     });
 
     this.binanceWs.on('close', () => {
-      console.log('Binance WebSocket closed. Reconnecting...');
+      console.log('🔄 Binance WebSocket closed. Reconnecting...');
       setTimeout(() => this.connectToBinance(), 5000);
     });
+  }
+
+  onModuleDestroy() {
+    if (this.binanceWs) {
+      console.log('👋 Closing Binance WebSocket connection...');
+      this.binanceWs.close();
+    }
   }
 }
