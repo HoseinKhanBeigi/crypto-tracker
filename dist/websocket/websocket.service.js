@@ -32,7 +32,6 @@ let WebSocketService = class WebSocketService {
     }
     onModuleInit() {
         this.connectToBinance();
-        this.startMetricsInterval();
     }
     connectToBinance() {
         const streamNames = this.symbols
@@ -61,7 +60,7 @@ let WebSocketService = class WebSocketService {
             if (now - this.timestamps[symbol] >= 1000) {
                 this.timestamps[symbol] = now;
                 this.coinData[symbol].push(formattedPrice);
-                if (this.coinData[symbol].length >= 5) {
+                if (this.coinData[symbol].length >= 50) {
                     console.log(`🧮 Calculating metrics for ${symbol}...`);
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
                     this.latestMetrics[symbol] = metrics;

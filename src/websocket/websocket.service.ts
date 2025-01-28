@@ -26,7 +26,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     // console.log('🚀 WebSocket Service initializing...');
     this.connectToBinance();
     // Start sending metrics every 60 seconds
-    this.startMetricsInterval();
+    // this.startMetricsInterval();
   }
 
   private connectToBinance() {
@@ -65,7 +65,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.coinData[symbol].push(formattedPrice);
         // console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
 
-        if (this.coinData[symbol].length >= 5) {
+        if (this.coinData[symbol].length >= 50) {
           console.log(`🧮 Calculating metrics for ${symbol}...`);
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
