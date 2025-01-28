@@ -40,8 +40,8 @@ let WebSocketService = class WebSocketService {
             .map((symbol) => `${symbol}@trade`)
             .join('/');
         const endpoints = [
-            `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
             `wss://stream.binance.us:9443/stream?streams=${streamNames}`,
+            `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
             `wss://fstream.binance.com/stream?streams=${streamNames}`,
             `wss://dstream.binance.com/stream?streams=${streamNames}`
         ];
@@ -63,38 +63,62 @@ let WebSocketService = class WebSocketService {
                     id: 1
                 };
                 this.binanceWs.send(JSON.stringify(subscribeMsg));
+                console.log('📨 Sent subscription message:', subscribeMsg);
             });
             this.binanceWs.on('message', async (data) => {
                 try {
                     const parsed = JSON.parse(data.toString());
-                    if (!parsed.data)
+                    if (!parsed.data) {
                         return;
+                    }
                     const stream = parsed.stream;
                     const symbol = stream.split('@')[0];
                     const trade = parsed.data;
                     const price = parseFloat(trade.p);
-                    if (isNaN(price))
+                    if (isNaN(price)) {
+                        console.log('⚠️ Invalid price:', trade.p);
                         return;
-                    const formattedPrice = this.metricsService.formatToInteger(price);
+                    }
+                    let formattedPrice = price;
+                    if (symbol === 'dogeusdt') {
+                        formattedPrice = price * 100000;
+                    }
+                    else if (symbol === 'btcusdt') {
+                        formattedPrice = price;
+                    }
+                    else if (symbol === 'xrpusdt') {
+                        formattedPrice = price * 1000;
+                    }
+                    console.log(`💰 ${symbol}: Original Price = ${price}, Formatted = ${formattedPrice}`);
                     const now = Date.now();
                     if (!this.coinData[symbol]) {
+                        console.log(`📊 Initializing data collection for ${symbol}`);
                         this.coinData[symbol] = [];
                         this.timestamps[symbol] = now;
                     }
                     if (now - this.timestamps[symbol] >= 1000) {
                         this.timestamps[symbol] = now;
                         this.coinData[symbol].push(formattedPrice);
-                        if (this.coinData[symbol].length >= 50) {
-                            console.log(`🧮 Calculating metrics for ${symbol}...`);
+                        console.log(`📊 ${symbol}: Data points collected: ${this.coinData[symbol].length}/10`);
+                        if (this.coinData[symbol].length >= 10) {
+                            console.log(`🧮 Starting metrics calculation for ${symbol}...`);
+                            console.log(`Raw data points for ${symbol}:`, this.coinData[symbol]);
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
+                            console.log(`📈 Metrics calculated for ${symbol}:`, metrics);
                             this.latestMetrics[symbol] = metrics;
                             try {
-                                console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
+                                const message = `
+📊 ${symbol.toUpperCase()} Update:
+💵 Current Price: $${price}
+📈 Average: $${(metrics.avgVelocity / 100).toFixed(2)}
+`;
+                                console.log(`📤 Sending message to Telegram:`, message);
                                 await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
                                 console.log(`✅ Metrics sent to Telegram successfully`);
                             }
                             catch (error) {
                                 console.error(`❌ Failed to send metrics to Telegram:`, error);
+                                console.error(`Error details:`, error.response?.data || error.message);
                             }
                             this.gateway.broadcast('price', { symbol, formattedPrice });
                             this.coinData[symbol] = [];
@@ -104,6 +128,7 @@ let WebSocketService = class WebSocketService {
                 }
                 catch (error) {
                     console.error('❌ Error processing message:', error);
+                    console.error('Error stack:', error.stack);
                 }
             });
             this.binanceWs.on('error', (err) => {

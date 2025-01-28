@@ -65,37 +65,22 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       this.binanceWs.on('message', async (data) => {
         try {
           const parsed = JSON.parse(data.toString());
-
-          if (!parsed.data) {
-            return; // Skip non-trade messages
-          }
+          if (!parsed.data) return;
 
           const stream = parsed.stream;
           const symbol = stream.split('@')[0];
           const trade = parsed.data;
 
           const price = parseFloat(trade.p);
-          if (isNaN(price)) {
-            console.log('⚠️ Invalid price:', trade.p);
-            return;
-          }
+          if (isNaN(price)) return;
 
-          // Format price correctly based on symbol
-          let formattedPrice = price;
-          if (symbol === 'dogeusdt') {
-            formattedPrice = price * 100000; // Convert to smaller unit for DOGE
-          } else if (symbol === 'btcusdt') {
-            formattedPrice = price; // Keep BTC price as is
-          } else if (symbol === 'xrpusdt') {
-            formattedPrice = price * 1000; // Convert to smaller unit for XRP
-          }
-
-          console.log(`💰 ${symbol}: Original Price = ${price}, Formatted = ${formattedPrice}`);
+          // Store raw price without modification
+          const formattedPrice = price;
+          console.log(`💰 ${symbol}: Price = ${formattedPrice}`);
 
           const now = Date.now();
 
           if (!this.coinData[symbol]) {
-            console.log(`📊 Initializing data collection for ${symbol}`);
             this.coinData[symbol] = [];
             this.timestamps[symbol] = now;
           }
@@ -103,41 +88,39 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           if (now - this.timestamps[symbol] >= 1000) {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
-            console.log(`📊 ${symbol}: Data points collected: ${this.coinData[symbol].length}/10`);
+            // console.log(`�� ${symbol}: Collected ${this.coinData[symbol].length}/10 data points`);
 
             if (this.coinData[symbol].length >= 10) {
-              console.log(`🧮 Starting metrics calculation for ${symbol}...`);
-              console.log(`Raw data points for ${symbol}:`, this.coinData[symbol]);
+              console.log(`🧮 Calculating metrics for ${symbol}...`);
+              console.log(`Data points:`, this.coinData[symbol]);
               
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
               
-              console.log(`📈 Metrics calculated for ${symbol}:`, metrics);
+              console.log(`📈 Calculated metrics:`, metrics);
               this.latestMetrics[symbol] = metrics;
 
               try {
                 const message = `
 📊 ${symbol.toUpperCase()} Update:
-💵 Current Price: $${price}
-📈 Average: $${(metrics.avgVelocity / 100).toFixed(2)}
+💰 Current Price: $${price}
+📈 Velocity: $${metrics.avgVelocity.toFixed(2)}
+🚀 Acceleration: $${metrics.avgAcceleration.toFixed(2)}
+💫 Jerk: $${metrics.avgJerk.toFixed(2)}
 `;
-                console.log(`📤 Sending message to Telegram:`, message);
+                console.log(`📤 Sending to Telegram:`, message);
                 await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
-                console.log(`✅ Metrics sent to Telegram successfully`);
               } catch (error) {
-                console.error(`❌ Failed to send metrics to Telegram:`, error);
-                console.error(`Error details:`, error.response?.data || error.message);
+                console.error(`❌ Failed to send to Telegram:`, error);
               }
 
-              this.gateway.broadcast('price', { symbol, formattedPrice });
               this.coinData[symbol] = [];
               console.log(`🔄 Reset data collection for ${symbol}`);
             }
           }
         } catch (error) {
-          console.error('❌ Error processing message:', error);
-          console.error('Error stack:', error.stack);
+          console.error('❌ Error:', error);
         }
       });
 

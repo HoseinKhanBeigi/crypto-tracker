@@ -8,12 +8,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var PingController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PingController = void 0;
 const common_1 = require("@nestjs/common");
-let PingController = class PingController {
+let PingController = PingController_1 = class PingController {
+    constructor() {
+        this.logger = new common_1.Logger(PingController_1.name);
+    }
     ping() {
-        return 'pong';
+        try {
+            this.logger.log('Received ping request');
+            return 'pong';
+        }
+        catch (error) {
+            this.logger.error('Error handling ping:', error);
+            throw error;
+        }
     }
 };
 exports.PingController = PingController;
@@ -23,7 +34,7 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PingController.prototype, "ping", null);
-exports.PingController = PingController = __decorate([
+exports.PingController = PingController = PingController_1 = __decorate([
     (0, common_1.Controller)()
 ], PingController);
 //# sourceMappingURL=ping.controller.js.map
