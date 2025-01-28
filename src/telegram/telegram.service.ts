@@ -63,6 +63,7 @@ export class TelegramService implements OnModuleInit {
 
   // Add new method for sending metrics
   async sendMetricsUpdate(symbol: string, metrics: any): Promise<void> {
+    console.log(`📊 Starting sendMetricsUpdate for ${symbol}...`);
     try {
       const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
@@ -74,13 +75,22 @@ Max Price: ${metrics.max || 'N/A'}
 Price Range: ${metrics.range || 'N/A'}
 `;
 
-      // You can store chat IDs in an array or get them from a configuration
-      const chatId = process.env.TELEGRAM_CHAT_ID; // Make sure to set this in your environment variables
-      if (chatId) {
-        await this.sendMessage(chatId, message);
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      console.log(`🔍 Using chat ID:`, chatId);
+
+      if (!chatId) {
+        console.error('❌ No TELEGRAM_CHAT_ID found in environment variables');
+        return;
       }
+
+      console.log(`📤 Attempting to send message to chat ${chatId}...`);
+      await this.sendMessage(chatId, message);
+      console.log(`✅ Metrics message sent successfully to chat ${chatId}`);
     } catch (error) {
-      console.error('Failed to send metrics update:', error.message);
+      console.error('❌ Failed to send metrics update:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+      }
     }
   }
 

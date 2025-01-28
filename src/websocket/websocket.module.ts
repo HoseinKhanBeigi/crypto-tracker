@@ -6,7 +6,11 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { TelegramModule } from '../telegram/telegram.module';
 
 @Module({
-  imports: [MetricsModule, NotificationsModule, TelegramModule],
+  imports: [
+    MetricsModule, 
+    NotificationsModule, 
+    TelegramModule
+  ],
   providers: [WebSocketGatewayService, WebSocketService],
 })
 export class WebSocketModule {}

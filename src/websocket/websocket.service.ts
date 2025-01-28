@@ -40,7 +40,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       console.log('Connected to Binance WebSocket.');
     });
 
-    this.binanceWs.on('message', (data) => {
+    this.binanceWs.on('message', async (data) => {
       const parsed = JSON.parse(data.toString());
       const stream = parsed.stream;
       const symbol = stream.split('@')[0];
@@ -50,7 +50,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       if (isNaN(price)) return;
 
       const formattedPrice = this.metricsService.formatToInteger(price);
-
       const now = Date.now();
 
       if (!this.coinData[symbol]) {
@@ -63,17 +62,21 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.coinData[symbol].push(formattedPrice);
 
         if (this.coinData[symbol].length >= 50) {
+          console.log(`📊 Calculating metrics for ${symbol}...`);
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );
+          
+          console.log(`✅ Metrics calculated:`, metrics);
 
-          const freq = this.metricsService.classifyFrequency(
-            this.coinData[symbol],
-          );
-
-          // Send metrics to Telegram
-          const metricsMessage = `Metrics for ${symbol.toUpperCase()}: ${JSON.stringify(metrics, null, 2)}`;
-          this.telegramService.sendMetricsUpdate(symbol, metrics);
+          try {
+            // Send metrics to Telegram
+            console.log(`📤 Attempting to send metrics to Telegram for ${symbol}...`);
+            await this.telegramService.sendMetricsUpdate(symbol, metrics);
+            console.log(`✅ Metrics sent to Telegram successfully`);
+          } catch (error) {
+            console.error(`❌ Failed to send metrics to Telegram:`, error);
+          }
 
           this.gateway.broadcast('price', { symbol, formattedPrice });
           this.coinData[symbol] = [];

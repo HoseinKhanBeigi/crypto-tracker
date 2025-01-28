@@ -18,7 +18,11 @@ let WebSocketModule = class WebSocketModule {
 exports.WebSocketModule = WebSocketModule;
 exports.WebSocketModule = WebSocketModule = __decorate([
     (0, common_1.Module)({
-        imports: [metrics_module_1.MetricsModule, notifications_module_1.NotificationsModule, telegram_module_1.TelegramModule],
+        imports: [
+            metrics_module_1.MetricsModule,
+            notifications_module_1.NotificationsModule,
+            telegram_module_1.TelegramModule
+        ],
         providers: [websocket_gateway_1.WebSocketGatewayService, websocket_service_1.WebSocketService],
     })
 ], WebSocketModule);
