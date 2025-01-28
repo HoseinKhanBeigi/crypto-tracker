@@ -5,23 +5,15 @@ import axios from 'axios';
 export class TelegramService implements OnModuleInit {
   private readonly botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU'; // Your BotFather token
   private readonly telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-  private readonly defaultChatId = 'YOUR_CHAT_ID_HERE'; // Add this after you get your chat ID
 
   async onModuleInit() {
     console.log('🤖 TelegramService initializing...');
     
-    // First, delete existing webhook and get updates
     try {
-      await axios.post(`${this.telegramApiUrl}/deleteWebhook`);
-      console.log('✅ Old webhook deleted');
-      
-      // Get any pending updates to see chat ID
-      const updates = await axios.get(`${this.telegramApiUrl}/getUpdates`);
-      console.log('📱 Updates:', JSON.stringify(updates.data, null, 2));
-      
-      // Then set up your webhook
+      // Set up webhook
       const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
       await this.setWebhook(webhookUrl);
+      console.log('✅ Webhook set up successfully');
     } catch (error) {
       console.error('❌ Error:', error.message);
     }
@@ -43,6 +35,7 @@ export class TelegramService implements OnModuleInit {
   // Send a message to a chat
   async sendMessage(chatId: string | number, text: string): Promise<void> {
     try {
+      console.log(`📤 Attempting to send message to chat ${chatId}`);
       const response = await axios.post(`${this.telegramApiUrl}/sendMessage`, {
         chat_id: chatId,
         text,
@@ -50,7 +43,6 @@ export class TelegramService implements OnModuleInit {
       console.log('✉️ Message sent successfully:', response.data);
     } catch (error) {
       console.error('❌ Failed to send message:', error.message);
-      // Log more details about the error
       if (error.response) {
         console.error('Error response:', error.response.data);
       }
@@ -58,8 +50,12 @@ export class TelegramService implements OnModuleInit {
   }
 
   // Add new method for sending metrics
-  async sendMetricsUpdate(symbol: string, metrics: any, chatId?: string | number): Promise<void> {
-    console.log(metrics);
+  async sendMetricsUpdate(symbol: string, metrics: any, chatId: string | number): Promise<void> {
+    if (!chatId) {
+      console.error('❌ No chat ID provided');
+      return;
+    }
+
     try {
       const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
@@ -71,18 +67,7 @@ Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
 
-      // Use provided chatId, or defaultChatId, or environment variable
-      const targetChatId = chatId || this.defaultChatId || process.env.TELEGRAM_CHAT_ID;
-      console.log(`🔍 Using chat ID:`, targetChatId);
-
-      if (!targetChatId) {
-        console.error('❌ No chat ID available');
-        return;
-      }
-
-      console.log(`📤 Attempting to send message to chat ${targetChatId}...`);
-      await this.sendMessage(targetChatId, message);
-      console.log(`✅ Metrics message sent successfully to chat ${targetChatId}`);
+      await this.sendMessage(chatId, message);
     } catch (error) {
       console.error('❌ Failed to send metrics update:', error);
       if (error.response) {

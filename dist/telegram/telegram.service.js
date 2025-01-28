@@ -16,17 +16,13 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-        this.defaultChatId = 'YOUR_CHAT_ID_HERE';
     }
     async onModuleInit() {
         console.log('🤖 TelegramService initializing...');
         try {
-            await axios_1.default.post(`${this.telegramApiUrl}/deleteWebhook`);
-            console.log('✅ Old webhook deleted');
-            const updates = await axios_1.default.get(`${this.telegramApiUrl}/getUpdates`);
-            console.log('📱 Updates:', JSON.stringify(updates.data, null, 2));
             const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
             await this.setWebhook(webhookUrl);
+            console.log('✅ Webhook set up successfully');
         }
         catch (error) {
             console.error('❌ Error:', error.message);
@@ -46,6 +42,7 @@ let TelegramService = class TelegramService {
     }
     async sendMessage(chatId, text) {
         try {
+            console.log(`📤 Attempting to send message to chat ${chatId}`);
             const response = await axios_1.default.post(`${this.telegramApiUrl}/sendMessage`, {
                 chat_id: chatId,
                 text,
@@ -60,7 +57,10 @@ let TelegramService = class TelegramService {
         }
     }
     async sendMetricsUpdate(symbol, metrics, chatId) {
-        console.log(metrics);
+        if (!chatId) {
+            console.error('❌ No chat ID provided');
+            return;
+        }
         try {
             const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
@@ -71,15 +71,7 @@ Min Price: ${metrics.min}
 Max Price: ${metrics.max}
 Price Range: ${metrics.range}
 `;
-            const targetChatId = chatId || this.defaultChatId || process.env.TELEGRAM_CHAT_ID;
-            console.log(`🔍 Using chat ID:`, targetChatId);
-            if (!targetChatId) {
-                console.error('❌ No chat ID available');
-                return;
-            }
-            console.log(`📤 Attempting to send message to chat ${targetChatId}...`);
-            await this.sendMessage(targetChatId, message);
-            console.log(`✅ Metrics message sent successfully to chat ${targetChatId}`);
+            await this.sendMessage(chatId, message);
         }
         catch (error) {
             console.error('❌ Failed to send metrics update:', error);
