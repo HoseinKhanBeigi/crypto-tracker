@@ -75,9 +75,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           if (isNaN(price)) return;
 
           // Store raw price without modification
-          const formattedPrice = price;
-          console.log(`💰 ${symbol}: Price = ${formattedPrice}`);
-
+          const formattedPrice = this.metricsService.formatToInteger(price);
           const now = Date.now();
 
           if (!this.coinData[symbol]) {
@@ -88,17 +86,15 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           if (now - this.timestamps[symbol] >= 1000) {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
-            // console.log(`�� ${symbol}: Collected ${this.coinData[symbol].length}/10 data points`);
 
-            if (this.coinData[symbol].length >= 5) {
-              console.log(`🧮 Calculating metrics for ${symbol}...`);
-              console.log(`Data points:`, this.coinData[symbol]);
+            if (this.coinData[symbol].length >= 20) {
+      
               
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
               
-              console.log(`📈 Calculated metrics:`, metrics);
+         
               this.latestMetrics[symbol] = metrics;
 
               try {
