@@ -12,12 +12,13 @@ const websocket_gateway_1 = require("./websocket.gateway");
 const websocket_service_1 = require("./websocket.service");
 const metrics_module_1 = require("../metrics/metrics.module");
 const notifications_module_1 = require("../notifications/notifications.module");
+const telegram_module_1 = require("../telegram/telegram.module");
 let WebSocketModule = class WebSocketModule {
 };
 exports.WebSocketModule = WebSocketModule;
 exports.WebSocketModule = WebSocketModule = __decorate([
     (0, common_1.Module)({
-        imports: [metrics_module_1.MetricsModule, notifications_module_1.NotificationsModule],
+        imports: [metrics_module_1.MetricsModule, notifications_module_1.NotificationsModule, telegram_module_1.TelegramModule],
         providers: [websocket_gateway_1.WebSocketGatewayService, websocket_service_1.WebSocketService],
     })
 ], WebSocketModule);

@@ -6,23 +6,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.TelegramModule = void 0;
 const common_1 = require("@nestjs/common");
-const websocket_module_1 = require("./websocket/websocket.module");
-const metrics_module_1 = require("./metrics/metrics.module");
-const notifications_module_1 = require("./notifications/notifications.module");
-const telegram_module_1 = require("./telegram/telegram.module");
-let AppModule = class AppModule {
+const telegram_service_1 = require("./telegram.service");
+const telegram_controller_1 = require("./telegram.controller");
+let TelegramModule = class TelegramModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.TelegramModule = TelegramModule;
+exports.TelegramModule = TelegramModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            websocket_module_1.WebSocketModule,
-            metrics_module_1.MetricsModule,
-            notifications_module_1.NotificationsModule,
-            telegram_module_1.TelegramModule,
-        ],
+        imports: [],
+        controllers: [telegram_controller_1.TelegramController],
+        providers: [telegram_service_1.TelegramService],
+        exports: [telegram_service_1.TelegramService],
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], TelegramModule);
+//# sourceMappingURL=telegram.module.js.map

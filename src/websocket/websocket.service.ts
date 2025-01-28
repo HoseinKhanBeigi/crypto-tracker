@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from './websocket.gateway';
+import { TelegramService } from '../telegram/telegram.service';
 
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
@@ -16,6 +17,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly metricsService: MetricsService,
     private readonly notificationsService: NotificationsService,
     private readonly gateway: WebSocketGatewayService,
+    private readonly telegramService: TelegramService,
   ) {}
   onModuleDestroy() {
     throw new Error('Method not implemented.');
@@ -60,7 +62,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
 
-        if (this.coinData[symbol].length >= 5) {
+        if (this.coinData[symbol].length >= 50) {
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],
           );
@@ -69,12 +71,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.coinData[symbol],
           );
 
-          // Log metrics and frequency to the console
-          console.log(`Metrics for ${symbol.toUpperCase()}:`, metrics);
-          // console.log(`Frequency for ${symbol.toUpperCase()}:`, freq);
-
-          // Save metrics and frequency to a file
-          // this.saveMetricsToFile(symbol, metrics, freq);
+          // Send metrics to Telegram
+          const metricsMessage = `Metrics for ${symbol.toUpperCase()}: ${JSON.stringify(metrics, null, 2)}`;
+          this.telegramService.sendMetricsUpdate(symbol, metrics);
 
           this.gateway.broadcast('price', { symbol, formattedPrice });
           this.coinData[symbol] = [];

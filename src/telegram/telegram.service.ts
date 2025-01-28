@@ -61,9 +61,33 @@ export class TelegramService implements OnModuleInit {
     }
   }
 
-  // Handle the /start command
+  // Add new method for sending metrics
+  async sendMetricsUpdate(symbol: string, metrics: any): Promise<void> {
+    try {
+      const message = `
+📊 Metrics for ${symbol.toUpperCase()}:
+
+Average Velocity: ${metrics.avgVelocity?.toFixed(2) || 'N/A'}
+Standard Deviation: ${metrics.stdDev?.toFixed(2) || 'N/A'}
+Min Price: ${metrics.min || 'N/A'}
+Max Price: ${metrics.max || 'N/A'}
+Price Range: ${metrics.range || 'N/A'}
+`;
+
+      // You can store chat IDs in an array or get them from a configuration
+      const chatId = process.env.TELEGRAM_CHAT_ID; // Make sure to set this in your environment variables
+      if (chatId) {
+        await this.sendMessage(chatId, message);
+      }
+    } catch (error) {
+      console.error('Failed to send metrics update:', error.message);
+    }
+  }
+
+  // Modify the existing handleStartCommand to include metrics info
   async handleStartCommand(chatId: string | number): Promise<void> {
     console.log('🎬 Handling /start command for chat:', chatId);
-    await this.sendMessage(chatId, 'Welcome to your Telegram bot!');
+    const message = `Welcome! You will receive crypto metrics updates in this chat.`;
+    await this.sendMessage(chatId, message);
   }
 }
