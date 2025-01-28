@@ -8,7 +8,7 @@ import { TelegramService } from '../telegram/telegram.service';
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private binanceWs: WebSocket;
-  private readonly symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
+  private readonly symbols = ['btcusdt'];
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
   private latestMetrics: Record<string, any> = {};
