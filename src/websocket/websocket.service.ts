@@ -13,7 +13,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
   private latestMetrics: Record<string, any> = {};
-  private metricsInterval: NodeJS.Timeout;
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -23,10 +22,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    // console.log('🚀 WebSocket Service initializing...');
     this.connectToBinance();
-    // Start sending metrics every 60 seconds
-    // this.startMetricsInterval();
   }
 
   private connectToBinance() {
@@ -55,7 +51,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       const now = Date.now();
 
       if (!this.coinData[symbol]) {
-        // console.log(`📊 Initializing data collection for ${symbol}`);
         this.coinData[symbol] = [];
         this.timestamps[symbol] = now;
       }
@@ -63,7 +58,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       if (now - this.timestamps[symbol] >= 1000) {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
-        // console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
 
         if (this.coinData[symbol].length >= 50) {
           console.log(`🧮 Calculating metrics for ${symbol}...`);
@@ -71,15 +65,11 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.coinData[symbol],
           );
           
-          // Store the latest metrics
           this.latestMetrics[symbol] = metrics;
-
-          // console.log(`✅ Metrics calculated for ${symbol}:`, metrics);
 
           try {
             console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-            await this.telegramService.sendMetricsUpdate(symbol, metrics,193418752
-);
+            await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
             console.log(`✅ Metrics sent to Telegram successfully`);
           } catch (error) {
             console.error(`❌ Failed to send metrics to Telegram:`, error);
@@ -107,28 +97,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       console.log('👋 Closing Binance WebSocket connection...');
       this.binanceWs.close();
     }
-    // Clear the interval when the module is destroyed
-    if (this.metricsInterval) {
-      clearInterval(this.metricsInterval);
-    }
-  }
-
-  private startMetricsInterval() {
-    this.metricsInterval = setInterval(async () => {
-      try {
-        const metrics = this.getLatestMetrics();
-        if (metrics && Object.keys(metrics).length > 0) {
-          console.log('📊 Sending periodic metrics update...');
-          await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752
-); // Replace with your chat ID
-        }
-      } catch (error) {
-        console.error('❌ Error sending periodic metrics:', error);
-      }
-    }, 60000); // 60000 ms = 60 seconds
   }
 
   getLatestMetrics(symbol: string = 'btcusdt') {
-    return this.latestMetrics[symbol] 
+    return this.latestMetrics[symbol];
   }
 }

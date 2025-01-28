@@ -91,23 +91,6 @@ let WebSocketService = class WebSocketService {
             console.log('👋 Closing Binance WebSocket connection...');
             this.binanceWs.close();
         }
-        if (this.metricsInterval) {
-            clearInterval(this.metricsInterval);
-        }
-    }
-    startMetricsInterval() {
-        this.metricsInterval = setInterval(async () => {
-            try {
-                const metrics = this.getLatestMetrics();
-                if (metrics && Object.keys(metrics).length > 0) {
-                    console.log('📊 Sending periodic metrics update...');
-                    await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
-                }
-            }
-            catch (error) {
-                console.error('❌ Error sending periodic metrics:', error);
-            }
-        }, 60000);
     }
     getLatestMetrics(symbol = 'btcusdt') {
         return this.latestMetrics[symbol];
