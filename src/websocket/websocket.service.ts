@@ -62,7 +62,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.coinData[symbol].push(formattedPrice);
         // console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
 
-        if (this.coinData[symbol].length >= 50) {
+        if (this.coinData[symbol].length >= 5) {
           console.log(`🧮 Calculating metrics for ${symbol}...`);
           const metrics = this.metricsService.calculateMetrics(
             this.coinData[symbol],

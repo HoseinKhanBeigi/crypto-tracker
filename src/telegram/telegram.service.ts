@@ -63,16 +63,16 @@ export class TelegramService implements OnModuleInit {
 
   // Add new method for sending metrics
   async sendMetricsUpdate(symbol: string, metrics: any, chatId?: string | number): Promise<void> {
-    console.log(`📊 Starting sendMetricsUpdate for ${symbol}...`);
+    console.log(metrics);
     try {
       const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
 
-Average Velocity: ${metrics.avgVelocity || 'N/A'}
-Standard Deviation: ${metrics.stdDev || 'N/A'}
-Min Price: ${metrics.min || 'N/A'}
-Max Price: ${metrics.max || 'N/A'}
-Price Range: ${metrics.range || 'N/A'}
+Average Velocity: ${metrics.avgVelocity}
+Standard Deviation: ${metrics.stdDev}
+Min Price: ${metrics.min}
+Max Price: ${metrics.max}
+Price Range: ${metrics.range}
 `;
 
       // Use provided chatId or fall back to environment variable

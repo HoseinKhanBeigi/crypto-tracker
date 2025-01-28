@@ -64,16 +64,16 @@ let TelegramService = class TelegramService {
         }
     }
     async sendMetricsUpdate(symbol, metrics, chatId) {
-        console.log(`📊 Starting sendMetricsUpdate for ${symbol}...`);
+        console.log(metrics);
         try {
             const message = `
 📊 Metrics for ${symbol.toUpperCase()}:
 
-Average Velocity: ${metrics.avgVelocity || 'N/A'}
-Standard Deviation: ${metrics.stdDev || 'N/A'}
-Min Price: ${metrics.min || 'N/A'}
-Max Price: ${metrics.max || 'N/A'}
-Price Range: ${metrics.range || 'N/A'}
+Average Velocity: ${metrics.avgVelocity}
+Standard Deviation: ${metrics.stdDev}
+Min Price: ${metrics.min}
+Max Price: ${metrics.max}
+Price Range: ${metrics.range}
 `;
             const targetChatId = chatId || process.env.TELEGRAM_CHAT_ID;
             console.log(`🔍 Using chat ID:`, targetChatId);
