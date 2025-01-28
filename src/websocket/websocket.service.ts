@@ -88,6 +88,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           const now = Date.now();
 
           if (!this.coinData[symbol]) {
+            console.log(`📊 Initializing data collection for ${symbol}`);
             this.coinData[symbol] = [];
             this.timestamps[symbol] = now;
           }
@@ -95,23 +96,27 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           if (now - this.timestamps[symbol] >= 1000) {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
-            console.log(`📊 ${symbol}: Data points collected: ${this.coinData[symbol].length}/50`);
+            console.log(`📊 ${symbol}: Data points collected: ${this.coinData[symbol].length}/10`);
 
-            if (this.coinData[symbol].length >= 50) {
-              console.log(`🧮 Calculating metrics for ${symbol}...`);
+            if (this.coinData[symbol].length >= 10) {
+              console.log(`🧮 Starting metrics calculation for ${symbol}...`);
+              console.log(`Data points:`, this.coinData[symbol]);
+              
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
               
+              console.log(`📈 Metrics calculated for ${symbol}:`, metrics);
               this.latestMetrics[symbol] = metrics;
-              console.log(`📈 Metrics calculated:`, metrics);
 
               try {
-                console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
+                console.log(`📤 Attempting to send metrics to Telegram...`);
+                console.log(`Using chat ID: 193418752`);
                 await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
                 console.log(`✅ Metrics sent to Telegram successfully`);
               } catch (error) {
                 console.error(`❌ Failed to send metrics to Telegram:`, error);
+                console.error(`Error details:`, error.response?.data || error.message);
               }
 
               this.gateway.broadcast('price', { symbol, formattedPrice });
@@ -121,6 +126,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           }
         } catch (error) {
           console.error('❌ Error processing message:', error);
+          console.error('Error stack:', error.stack);
         }
       });
 
