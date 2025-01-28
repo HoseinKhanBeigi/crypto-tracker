@@ -26,13 +26,14 @@ let TelegramController = TelegramController_1 = class TelegramController {
         this.logger = new common_1.Logger(TelegramController_1.name);
     }
     async handleWebhook(update, req) {
+        console.log('Full update object:', JSON.stringify(update, null, 2));
         this.logger.log('Headers:', req.headers);
         this.logger.log('Raw Body:', req.rawBody);
         this.logger.log('Parsed Body:', update);
         try {
             if (update.message?.text) {
                 const chatId = update.message.chat.id;
-                console.log('chatId', chatId);
+                console.log('📱 Chat ID:', chatId);
                 const text = update.message.text;
                 this.logger.log(`📝 Received message: "${text}" from chat ID: ${chatId}`);
                 if (text === '/start') {

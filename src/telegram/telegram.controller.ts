@@ -15,6 +15,9 @@ export class TelegramController {
 
   @Post('webhook')
   async handleWebhook(@Body() update: any, @Req() req: any) {
+    // Add this line to see the full update object
+    console.log('Full update object:', JSON.stringify(update, null, 2));
+
     // Log the entire request
     this.logger.log('Headers:', req.headers);
     this.logger.log('Raw Body:', req.rawBody);
@@ -23,7 +26,7 @@ export class TelegramController {
     try {
       if (update.message?.text) {
         const chatId = update.message.chat.id;
-        console.log('chatId', chatId);
+        console.log('📱 Chat ID:', chatId);
         const text = update.message.text;
         
         this.logger.log(`📝 Received message: "${text}" from chat ID: ${chatId}`);
