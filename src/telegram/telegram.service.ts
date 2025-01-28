@@ -1,6 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { TelegramClient } from 'telegram';
-import { StringSession } from 'telegram/sessions';
+
 import axios from 'axios';
 
 @Injectable()
