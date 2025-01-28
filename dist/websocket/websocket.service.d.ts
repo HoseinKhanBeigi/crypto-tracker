@@ -12,8 +12,10 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly symbols;
     private coinData;
     private timestamps;
+    private latestMetrics;
     constructor(metricsService: MetricsService, notificationsService: NotificationsService, gateway: WebSocketGatewayService, telegramService: TelegramService);
     onModuleInit(): void;
     private connectToBinance;
     onModuleDestroy(): void;
+    getLatestMetrics(symbol?: string): any;
 }

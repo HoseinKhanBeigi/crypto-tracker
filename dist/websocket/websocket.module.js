@@ -24,6 +24,7 @@ exports.WebSocketModule = WebSocketModule = __decorate([
             telegram_module_1.TelegramModule
         ],
         providers: [websocket_gateway_1.WebSocketGatewayService, websocket_service_1.WebSocketService],
+        exports: [websocket_service_1.WebSocketService],
     })
 ], WebSocketModule);
 //# sourceMappingURL=websocket.module.js.map

@@ -12,6 +12,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private readonly symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
+  private latestMetrics: Record<string, any> = {};
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -21,7 +22,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
-    console.log('🚀 WebSocket Service initializing...');
+    // console.log('🚀 WebSocket Service initializing...');
     this.connectToBinance();
   }
 
@@ -51,7 +52,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       const now = Date.now();
 
       if (!this.coinData[symbol]) {
-        console.log(`📊 Initializing data collection for ${symbol}`);
+        // console.log(`📊 Initializing data collection for ${symbol}`);
         this.coinData[symbol] = [];
         this.timestamps[symbol] = now;
       }
@@ -59,7 +60,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       if (now - this.timestamps[symbol] >= 1000) {
         this.timestamps[symbol] = now;
         this.coinData[symbol].push(formattedPrice);
-        console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
+        // console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
 
         if (this.coinData[symbol].length >= 50) {
           console.log(`🧮 Calculating metrics for ${symbol}...`);
@@ -67,7 +68,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.coinData[symbol],
           );
           
-          console.log(`✅ Metrics calculated for ${symbol}:`, metrics);
+          // Store the latest metrics
+          this.latestMetrics[symbol] = metrics;
+
+          // console.log(`✅ Metrics calculated for ${symbol}:`, metrics);
 
           try {
             console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
@@ -99,5 +103,15 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       console.log('👋 Closing Binance WebSocket connection...');
       this.binanceWs.close();
     }
+  }
+
+  getLatestMetrics(symbol: string = 'btcusdt') {
+    return this.latestMetrics[symbol] || {
+      avgVelocity: 0,
+      stdDev: 0,
+      min: 0,
+      max: 0,
+      range: 0
+    };
   }
 }

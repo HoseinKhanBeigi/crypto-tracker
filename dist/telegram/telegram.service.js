@@ -63,7 +63,7 @@ let TelegramService = class TelegramService {
             }
         }
     }
-    async sendMetricsUpdate(symbol, metrics) {
+    async sendMetricsUpdate(symbol, metrics, chatId) {
         console.log(`📊 Starting sendMetricsUpdate for ${symbol}...`);
         try {
             const message = `
@@ -75,15 +75,15 @@ Min Price: ${metrics.min || 'N/A'}
 Max Price: ${metrics.max || 'N/A'}
 Price Range: ${metrics.range || 'N/A'}
 `;
-            const chatId = process.env.TELEGRAM_CHAT_ID;
-            console.log(`🔍 Using chat ID:`, chatId);
-            if (!chatId) {
-                console.error('❌ No TELEGRAM_CHAT_ID found in environment variables');
+            const targetChatId = chatId || process.env.TELEGRAM_CHAT_ID;
+            console.log(`🔍 Using chat ID:`, targetChatId);
+            if (!targetChatId) {
+                console.error('❌ No chat ID available');
                 return;
             }
-            console.log(`📤 Attempting to send message to chat ${chatId}...`);
-            await this.sendMessage(chatId, message);
-            console.log(`✅ Metrics message sent successfully to chat ${chatId}`);
+            console.log(`📤 Attempting to send message to chat ${targetChatId}...`);
+            await this.sendMessage(targetChatId, message);
+            console.log(`✅ Metrics message sent successfully to chat ${targetChatId}`);
         }
         catch (error) {
             console.error('❌ Failed to send metrics update:', error);

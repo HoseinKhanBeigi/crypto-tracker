@@ -10,12 +10,17 @@ exports.TelegramModule = void 0;
 const common_1 = require("@nestjs/common");
 const telegram_service_1 = require("./telegram.service");
 const telegram_controller_1 = require("./telegram.controller");
+const metrics_module_1 = require("../metrics/metrics.module");
+const websocket_module_1 = require("../websocket/websocket.module");
 let TelegramModule = class TelegramModule {
 };
 exports.TelegramModule = TelegramModule;
 exports.TelegramModule = TelegramModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [
+            metrics_module_1.MetricsModule,
+            websocket_module_1.WebSocketModule,
+        ],
         controllers: [telegram_controller_1.TelegramController],
         providers: [telegram_service_1.TelegramService],
         exports: [telegram_service_1.TelegramService],

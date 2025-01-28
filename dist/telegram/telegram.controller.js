@@ -16,9 +16,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TelegramController = void 0;
 const common_1 = require("@nestjs/common");
 const telegram_service_1 = require("./telegram.service");
+const metrics_service_1 = require("../metrics/metrics.service");
+const websocket_service_1 = require("../websocket/websocket.service");
 let TelegramController = TelegramController_1 = class TelegramController {
-    constructor(telegramService) {
+    constructor(telegramService, metricsService, webSocketService) {
         this.telegramService = telegramService;
+        this.metricsService = metricsService;
+        this.webSocketService = webSocketService;
         this.logger = new common_1.Logger(TelegramController_1.name);
     }
     async handleWebhook(update, req) {
@@ -28,12 +32,17 @@ let TelegramController = TelegramController_1 = class TelegramController {
         try {
             if (update.message?.text) {
                 const chatId = update.message.chat.id;
+                console.log('chatId', chatId);
                 const text = update.message.text;
                 this.logger.log(`📝 Received message: "${text}" from chat ID: ${chatId}`);
                 if (text === '/start') {
                     this.logger.log('🎬 Received /start command');
                     await this.telegramService.handleStartCommand(chatId);
-                    return { ok: true, message: 'Start command handled' };
+                    const metrics = this.webSocketService.getLatestMetrics();
+                    if (metrics) {
+                        await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+                    }
+                    return { ok: true, message: 'Start command and metrics sent' };
                 }
             }
             return { ok: true, message: 'Webhook received' };
@@ -59,6 +68,8 @@ __decorate([
 ], TelegramController.prototype, "handleWebhook", null);
 exports.TelegramController = TelegramController = TelegramController_1 = __decorate([
     (0, common_1.Controller)('telegram'),
-    __metadata("design:paramtypes", [telegram_service_1.TelegramService])
+    __metadata("design:paramtypes", [telegram_service_1.TelegramService,
+        metrics_service_1.MetricsService,
+        websocket_service_1.WebSocketService])
 ], TelegramController);
 //# sourceMappingURL=telegram.controller.js.map

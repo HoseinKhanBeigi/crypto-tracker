@@ -28,9 +28,9 @@ let WebSocketService = class WebSocketService {
         this.symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
         this.coinData = {};
         this.timestamps = {};
+        this.latestMetrics = {};
     }
     onModuleInit() {
-        console.log('🚀 WebSocket Service initializing...');
         this.connectToBinance();
     }
     connectToBinance() {
@@ -54,18 +54,16 @@ let WebSocketService = class WebSocketService {
             const formattedPrice = this.metricsService.formatToInteger(price);
             const now = Date.now();
             if (!this.coinData[symbol]) {
-                console.log(`📊 Initializing data collection for ${symbol}`);
                 this.coinData[symbol] = [];
                 this.timestamps[symbol] = now;
             }
             if (now - this.timestamps[symbol] >= 1000) {
                 this.timestamps[symbol] = now;
                 this.coinData[symbol].push(formattedPrice);
-                console.log(`📈 ${symbol}: Collected ${this.coinData[symbol].length}/50 data points`);
                 if (this.coinData[symbol].length >= 50) {
                     console.log(`🧮 Calculating metrics for ${symbol}...`);
                     const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                    console.log(`✅ Metrics calculated for ${symbol}:`, metrics);
+                    this.latestMetrics[symbol] = metrics;
                     try {
                         console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
                         await this.telegramService.sendMetricsUpdate(symbol, metrics);
@@ -93,6 +91,15 @@ let WebSocketService = class WebSocketService {
             console.log('👋 Closing Binance WebSocket connection...');
             this.binanceWs.close();
         }
+    }
+    getLatestMetrics(symbol = 'btcusdt') {
+        return this.latestMetrics[symbol] || {
+            avgVelocity: 0,
+            stdDev: 0,
+            min: 0,
+            max: 0,
+            range: 0
+        };
     }
 };
 exports.WebSocketService = WebSocketService;

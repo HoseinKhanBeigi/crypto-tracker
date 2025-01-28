@@ -12,5 +12,6 @@ import { TelegramModule } from '../telegram/telegram.module';
     TelegramModule
   ],
   providers: [WebSocketGatewayService, WebSocketService],
+  exports: [WebSocketService],
 })
 export class WebSocketModule {}
