@@ -9,7 +9,7 @@ export class TelegramService implements OnModuleInit {
   async onModuleInit() {
     console.log('🤖 TelegramService initializing...');
     // Make sure this URL matches your actual Vercel deployment URL
-    const webhookUrl = 'https://your-vercel-app-url.vercel.app/telegram/webhook';
+    const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
     
     // First, delete any existing webhook
     try {
