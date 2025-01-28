@@ -39,7 +39,7 @@ export class TelegramController {
             
             try {
               // Send welcome message
-              await this.telegramService.handleStartCommand(chatId);
+              await this.telegramService.handleStartCommand(193418752);
               console.log('✅ Welcome message sent successfully');
 
               // Get real metrics from WebSocket service
@@ -47,7 +47,7 @@ export class TelegramController {
               console.log('📊 Got metrics:', metrics);
               
               if (metrics) {
-                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
                 console.log('✅ Metrics sent successfully');
               }
             } catch (error) {
