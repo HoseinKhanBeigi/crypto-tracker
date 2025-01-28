@@ -42,9 +42,14 @@ let TelegramService = class TelegramService {
     }
     async sendMessage(chatId, text) {
         try {
-            console.log(`📤 Attempting to send message to chat ${chatId}`);
+            const numericChatId = Number(chatId);
+            if (isNaN(numericChatId)) {
+                console.error('❌ Invalid chat ID:', chatId);
+                return;
+            }
+            console.log(`📤 Attempting to send message to chat ${numericChatId}`);
             const response = await axios_1.default.post(`${this.telegramApiUrl}/sendMessage`, {
-                chat_id: chatId,
+                chat_id: numericChatId,
                 text,
             });
             console.log('✉️ Message sent successfully:', response.data);
@@ -53,6 +58,10 @@ let TelegramService = class TelegramService {
             console.error('❌ Failed to send message:', error.message);
             if (error.response) {
                 console.error('Error response:', error.response.data);
+                console.error('Request data:', {
+                    chat_id: chatId,
+                    text: text.substring(0, 100) + '...'
+                });
             }
         }
     }

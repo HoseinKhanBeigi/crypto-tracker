@@ -35,9 +35,16 @@ export class TelegramService implements OnModuleInit {
   // Send a message to a chat
   async sendMessage(chatId: string | number, text: string): Promise<void> {
     try {
-      console.log(`📤 Attempting to send message to chat ${chatId}`);
+      // Ensure chatId is a number
+      const numericChatId = Number(chatId);
+      if (isNaN(numericChatId)) {
+        console.error('❌ Invalid chat ID:', chatId);
+        return;
+      }
+
+      console.log(`📤 Attempting to send message to chat ${numericChatId}`);
       const response = await axios.post(`${this.telegramApiUrl}/sendMessage`, {
-        chat_id: chatId,
+        chat_id: numericChatId,
         text,
       });
       console.log('✉️ Message sent successfully:', response.data);
@@ -45,6 +52,10 @@ export class TelegramService implements OnModuleInit {
       console.error('❌ Failed to send message:', error.message);
       if (error.response) {
         console.error('Error response:', error.response.data);
+        console.error('Request data:', {
+          chat_id: chatId,
+          text: text.substring(0, 100) + '...' // Log first 100 chars of message
+        });
       }
     }
   }

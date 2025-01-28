@@ -32,6 +32,7 @@ let WebSocketService = class WebSocketService {
     }
     onModuleInit() {
         this.connectToBinance();
+        this.startMetricsInterval();
     }
     connectToBinance() {
         const streamNames = this.symbols
@@ -66,7 +67,7 @@ let WebSocketService = class WebSocketService {
                     this.latestMetrics[symbol] = metrics;
                     try {
                         console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-                        await this.telegramService.sendMetricsUpdate(symbol, metrics);
+                        await this.telegramService.sendMetricsUpdate(symbol, metrics, '5012867228');
                         console.log(`✅ Metrics sent to Telegram successfully`);
                     }
                     catch (error) {
@@ -91,15 +92,26 @@ let WebSocketService = class WebSocketService {
             console.log('👋 Closing Binance WebSocket connection...');
             this.binanceWs.close();
         }
+        if (this.metricsInterval) {
+            clearInterval(this.metricsInterval);
+        }
+    }
+    startMetricsInterval() {
+        this.metricsInterval = setInterval(async () => {
+            try {
+                const metrics = this.getLatestMetrics();
+                if (metrics && Object.keys(metrics).length > 0) {
+                    console.log('📊 Sending periodic metrics update...');
+                    await this.telegramService.sendMetricsUpdate('btcusdt', metrics, '5012867228');
+                }
+            }
+            catch (error) {
+                console.error('❌ Error sending periodic metrics:', error);
+            }
+        }, 60000);
     }
     getLatestMetrics(symbol = 'btcusdt') {
-        return this.latestMetrics[symbol] || {
-            avgVelocity: 0,
-            stdDev: 0,
-            min: 0,
-            max: 0,
-            range: 0
-        };
+        return this.latestMetrics[symbol];
     }
 };
 exports.WebSocketService = WebSocketService;

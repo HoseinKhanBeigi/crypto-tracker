@@ -13,6 +13,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private coinData: Record<string, number[]> = {};
   private timestamps: Record<string, number> = {};
   private latestMetrics: Record<string, any> = {};
+  private metricsInterval: NodeJS.Timeout;
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -24,6 +25,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     // console.log('🚀 WebSocket Service initializing...');
     this.connectToBinance();
+    // Start sending metrics every 60 seconds
+    this.startMetricsInterval();
   }
 
   private connectToBinance() {
@@ -75,7 +78,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
           try {
             console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-            await this.telegramService.sendMetricsUpdate(symbol, metrics);
+            await this.telegramService.sendMetricsUpdate(symbol, metrics,'5012867228');
             console.log(`✅ Metrics sent to Telegram successfully`);
           } catch (error) {
             console.error(`❌ Failed to send metrics to Telegram:`, error);
@@ -103,15 +106,27 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       console.log('👋 Closing Binance WebSocket connection...');
       this.binanceWs.close();
     }
+    // Clear the interval when the module is destroyed
+    if (this.metricsInterval) {
+      clearInterval(this.metricsInterval);
+    }
+  }
+
+  private startMetricsInterval() {
+    this.metricsInterval = setInterval(async () => {
+      try {
+        const metrics = this.getLatestMetrics();
+        if (metrics && Object.keys(metrics).length > 0) {
+          console.log('📊 Sending periodic metrics update...');
+          await this.telegramService.sendMetricsUpdate('btcusdt', metrics, '5012867228'); // Replace with your chat ID
+        }
+      } catch (error) {
+        console.error('❌ Error sending periodic metrics:', error);
+      }
+    }, 60000); // 60000 ms = 60 seconds
   }
 
   getLatestMetrics(symbol: string = 'btcusdt') {
-    return this.latestMetrics[symbol] || {
-      avgVelocity: 0,
-      stdDev: 0,
-      min: 0,
-      max: 0,
-      range: 0
-    };
+    return this.latestMetrics[symbol] 
   }
 }

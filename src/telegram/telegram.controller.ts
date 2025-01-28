@@ -15,41 +15,70 @@ export class TelegramController {
 
   @Post('webhook')
   async handleWebhook(@Body() update: any, @Req() req: any) {
-    // Add this line to see the full update object
-    console.log('Full update object:', JSON.stringify(update, null, 2));
-
-    // Log the entire request
-    this.logger.log('Headers:', req.headers);
-    this.logger.log('Raw Body:', req.rawBody);
-    this.logger.log('Parsed Body:', update);
+    // Add detailed logging of the update object
+    console.log('🔍 Received webhook update:', JSON.stringify(update, null, 2));
 
     try {
       if (update.message?.text) {
         const chatId = update.message.chat.id;
-        console.log('📱 Chat ID:', chatId);
-        const text = update.message.text;
+        // Add more detailed logging
+        console.log('💬 Message details:', {
+          chatId: chatId,
+          type: typeof chatId,
+          text: update.message.text,
+          from: update.message.from,
+          chat: update.message.chat
+        });
+
+        const text = update.message.text.toLowerCase();
         
-        this.logger.log(`📝 Received message: "${text}" from chat ID: ${chatId}`);
+        // Handle different commands
+        switch (text) {
+          case '/start':
+            this.logger.log('🎬 Received /start command');
+            
+            try {
+              // Send welcome message
+              await this.telegramService.handleStartCommand(chatId);
+              console.log('✅ Welcome message sent successfully');
 
-        if (text === '/start') {
-          this.logger.log('🎬 Received /start command');
-          
-          // Send welcome message
-          await this.telegramService.handleStartCommand(chatId);
+              // Get real metrics from WebSocket service
+              const metrics = this.webSocketService.getLatestMetrics();
+              console.log('📊 Got metrics:', metrics);
+              
+              if (metrics) {
+                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+                console.log('✅ Metrics sent successfully');
+              }
+            } catch (error) {
+              console.error('❌ Error sending messages:', error);
+              if (error.response) {
+                console.error('Error response:', error.response.data);
+              }
+            }
+            
+            return { ok: true, message: 'Start command and metrics sent' };
 
-          // Get real metrics from WebSocket service
-          const metrics = this.webSocketService.getLatestMetrics();
-          if (metrics) {
-            await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
-          }
-          
-          return { ok: true, message: 'Start command and metrics sent' };
+          case '/metrics':
+          case 'metrics':
+            // Get real metrics from WebSocket service
+            const metrics = this.webSocketService.getLatestMetrics();
+            console.log('📊 Got metrics:', metrics);
+            
+            if (metrics) {
+              await this.telegramService.sendMetricsUpdate('btcusdt', metrics, chatId);
+              console.log('✅ Metrics sent successfully');
+            } else {
+              await this.telegramService.sendMessage(chatId, 'No metrics available yet. Please wait a moment and try again.');
+            }
+            break;
         }
+
+        return { ok: true, message: 'Command handled successfully' };
       }
       return { ok: true, message: 'Webhook received' };
     } catch (error) {
       this.logger.error('❌ Error handling webhook:', error);
-      // Return error response instead of throwing
       return { 
         ok: false, 
         error: error.message,
