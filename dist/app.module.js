@@ -12,6 +12,8 @@ const websocket_module_1 = require("./websocket/websocket.module");
 const metrics_module_1 = require("./metrics/metrics.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const telegram_module_1 = require("./telegram/telegram.module");
+const ping_service_1 = require("./ping.service");
+const ping_controller_1 = require("./ping/ping.controller");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -23,6 +25,8 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             telegram_module_1.TelegramModule,
         ],
+        controllers: [ping_controller_1.PingController],
+        providers: [ping_service_1.PingService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
