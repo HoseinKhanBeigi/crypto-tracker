@@ -78,7 +78,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
           try {
             console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-            await this.telegramService.sendMetricsUpdate(symbol, metrics,'5012867228');
+            await this.telegramService.sendMetricsUpdate(symbol, metrics,193418752
+);
             console.log(`✅ Metrics sent to Telegram successfully`);
           } catch (error) {
             console.error(`❌ Failed to send metrics to Telegram:`, error);
@@ -118,7 +119,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         const metrics = this.getLatestMetrics();
         if (metrics && Object.keys(metrics).length > 0) {
           console.log('📊 Sending periodic metrics update...');
-          await this.telegramService.sendMetricsUpdate('btcusdt', metrics, '5012867228'); // Replace with your chat ID
+          await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752
+); // Replace with your chat ID
         }
       } catch (error) {
         console.error('❌ Error sending periodic metrics:', error);

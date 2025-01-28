@@ -67,7 +67,7 @@ let WebSocketService = class WebSocketService {
                     this.latestMetrics[symbol] = metrics;
                     try {
                         console.log(`📤 Sending metrics to Telegram for ${symbol}...`);
-                        await this.telegramService.sendMetricsUpdate(symbol, metrics, '5012867228');
+                        await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
                         console.log(`✅ Metrics sent to Telegram successfully`);
                     }
                     catch (error) {
@@ -102,7 +102,7 @@ let WebSocketService = class WebSocketService {
                 const metrics = this.getLatestMetrics();
                 if (metrics && Object.keys(metrics).length > 0) {
                     console.log('📊 Sending periodic metrics update...');
-                    await this.telegramService.sendMetricsUpdate('btcusdt', metrics, '5012867228');
+                    await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
                 }
             }
             catch (error) {
