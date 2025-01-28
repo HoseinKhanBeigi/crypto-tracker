@@ -32,8 +32,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       .join('/');
 
     const endpoints = [
-     `wss://stream.binance.com:9443/stream?streams=${streamNames}`
-      // `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
+     `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
+      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       // `wss://fstream.binance.com/stream?streams=${streamNames}`,
       // `wss://dstream.binance.com/stream?streams=${streamNames}`
     ];
@@ -44,7 +44,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     console.log(`🔌 Connecting to Binance WebSocket: ${endpoint}`);
 
     try {
-      this.binanceWs = new WebSocket(url, {
+      this.binanceWs = new WebSocket(endpoint, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         },

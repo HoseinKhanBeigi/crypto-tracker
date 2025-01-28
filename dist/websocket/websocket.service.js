@@ -25,7 +25,7 @@ let WebSocketService = class WebSocketService {
         this.notificationsService = notificationsService;
         this.gateway = gateway;
         this.telegramService = telegramService;
-        this.symbols = ['btcusdt', 'dogeusdt', 'xrpusdt'];
+        this.symbols = ['btcusdt'];
         this.coinData = {};
         this.timestamps = {};
         this.latestMetrics = {};
@@ -40,11 +40,10 @@ let WebSocketService = class WebSocketService {
             .map((symbol) => `${symbol}@trade`)
             .join('/');
         const endpoints = [
-            `wss://stream.binance.us:9443/stream?streams=${streamNames}`,
             `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
-            `wss://fstream.binance.com/stream?streams=${streamNames}`,
-            `wss://dstream.binance.com/stream?streams=${streamNames}`
+            `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
         ];
+        const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
         const endpoint = endpoints[this.reconnectAttempts % endpoints.length];
         console.log(`🔌 Connecting to Binance WebSocket: ${endpoint}`);
         try {
@@ -56,14 +55,6 @@ let WebSocketService = class WebSocketService {
             });
             this.binanceWs.on('open', () => {
                 console.log('✅ Connected to Binance WebSocket');
-                this.reconnectAttempts = 0;
-                const subscribeMsg = {
-                    method: 'SUBSCRIBE',
-                    params: this.symbols.map(symbol => `${symbol}@trade`),
-                    id: 1
-                };
-                this.binanceWs.send(JSON.stringify(subscribeMsg));
-                console.log('📨 Sent subscription message:', subscribeMsg);
             });
             this.binanceWs.on('message', async (data) => {
                 try {
@@ -76,8 +67,7 @@ let WebSocketService = class WebSocketService {
                     const price = parseFloat(trade.p);
                     if (isNaN(price))
                         return;
-                    const formattedPrice = price;
-                    console.log(`💰 ${symbol}: Price = ${formattedPrice}`);
+                    const formattedPrice = this.metricsService.formatToInteger(price);
                     const now = Date.now();
                     if (!this.coinData[symbol]) {
                         this.coinData[symbol] = [];
@@ -86,11 +76,8 @@ let WebSocketService = class WebSocketService {
                     if (now - this.timestamps[symbol] >= 1000) {
                         this.timestamps[symbol] = now;
                         this.coinData[symbol].push(formattedPrice);
-                        if (this.coinData[symbol].length >= 10) {
-                            console.log(`🧮 Calculating metrics for ${symbol}...`);
-                            console.log(`Data points:`, this.coinData[symbol]);
+                        if (this.coinData[symbol].length >= 20) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            console.log(`📈 Calculated metrics:`, metrics);
                             this.latestMetrics[symbol] = metrics;
                             try {
                                 const message = `
