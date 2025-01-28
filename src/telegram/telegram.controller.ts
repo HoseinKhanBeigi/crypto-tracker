@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Logger, Req, Raw } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 
 @Controller('telegram')
@@ -8,8 +8,11 @@ export class TelegramController {
   constructor(private readonly telegramService: TelegramService) {}
 
   @Post('webhook')
-  async handleWebhook(@Body() update: any) {
-    this.logger.log('📥 Received webhook update:', JSON.stringify(update, null, 2));
+  async handleWebhook(@Body() update: any, @Req() req: any) {
+    // Log the entire request
+    this.logger.log('Headers:', req.headers);
+    this.logger.log('Raw Body:', req.rawBody);
+    this.logger.log('Parsed Body:', update);
 
     try {
       if (update.message?.text) {
@@ -21,12 +24,18 @@ export class TelegramController {
         if (text === '/start') {
           this.logger.log('🎬 Received /start command');
           await this.telegramService.handleStartCommand(chatId);
+          return { ok: true, message: 'Start command handled' };
         }
       }
-      return { ok: true };
+      return { ok: true, message: 'Webhook received' };
     } catch (error) {
       this.logger.error('❌ Error handling webhook:', error);
-      throw error;
+      // Return error response instead of throwing
+      return { 
+        ok: false, 
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
     }
   }
 }
