@@ -20,7 +20,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly notificationsService: NotificationsService,
     private readonly gateway: WebSocketGatewayService,
     private readonly telegramService: TelegramService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.connectToBinance();
@@ -42,7 +42,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
     const endpoint = endpoints[this.reconnectAttempts % endpoints.length];
 
-
     try {
       this.binanceWs = new WebSocket(url, {
         headers: {
@@ -52,9 +51,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         timeout: 30000,
       });
 
-      this.binanceWs.on('open', () => {
-
-      });
+      this.binanceWs.on('open', () => {});
 
       this.binanceWs.on('message', async (data) => {
         try {
@@ -68,7 +65,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
           const price = parseFloat(trade.p);
           if (isNaN(price)) return;
 
-          // Store raw price without modification
           const formattedPrice = this.metricsService.formatToInteger(price);
           const now = Date.now();
 
@@ -82,35 +78,30 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.coinData[symbol].push(formattedPrice);
 
             if (this.coinData[symbol].length >= 50) {
-
-
-
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
 
-
-              // this.latestMetrics[symbol] = metrics;
-
-              try {
-                const message = `
+              // Only send message if velocity is significant
+              if (Math.abs(metrics.avgVelocity) > 1) {
+                try {
+                  const message = `
 📊 ${symbol.toUpperCase()} Update:
 💰 Current Price: $${price}
 📈 Velocity: $${metrics.avgVelocity}
 `;
-
-                await this.telegramService.sendMetricsUpdate(
-                  symbol,
-                  metrics,
-                  193418752,
-                  price
-                );
-              } catch (error) {
-                console.error(`❌ Failed to send to Telegram:`, error);
+                  await this.telegramService.sendMetricsUpdate(
+                    symbol,
+                    metrics,
+                    193418752,
+                    price,
+                  );
+                } catch (error) {
+                  console.error(`❌ Failed to send to Telegram:`, error);
+                }
               }
 
               this.coinData[symbol] = [];
-
             }
           }
         } catch (error) {
@@ -123,7 +114,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.reconnectAttempts++;
 
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-
           setTimeout(
             () => this.connectToBinance(),
             5000 * this.reconnectAttempts,
@@ -134,9 +124,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.binanceWs.on('close', () => {
-
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-
           setTimeout(
             () => this.connectToBinance(),
             5000 * this.reconnectAttempts,
@@ -157,7 +145,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
   onModuleDestroy() {
     if (this.binanceWs) {
-
       this.binanceWs.close();
     }
   }

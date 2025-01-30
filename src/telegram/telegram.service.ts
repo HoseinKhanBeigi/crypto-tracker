@@ -7,14 +7,11 @@ export class TelegramService implements OnModuleInit {
   private readonly telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
 
   async onModuleInit() {
-
-
     try {
       // Set up webhook
       const webhookUrl =
         'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
       await this.setWebhook(webhookUrl);
-    
     } catch (error) {
       console.error('❌ Error:', error.message);
     }
@@ -27,7 +24,6 @@ export class TelegramService implements OnModuleInit {
         url,
         allowed_updates: ['message'],
       });
-
     } catch (error) {
       console.error('❌ Failed to set webhook:', error.message);
     }
@@ -43,12 +39,10 @@ export class TelegramService implements OnModuleInit {
         return;
       }
 
-  
       const response = await axios.post(`${this.telegramApiUrl}/sendMessage`, {
         chat_id: numericChatId,
         text,
       });
-
     } catch (error) {
       console.error('❌ Failed to send message:', error.message);
       if (error.response) {
@@ -66,14 +60,12 @@ export class TelegramService implements OnModuleInit {
     symbol: string,
     metrics: any,
     chatId: string | number,
-    price:any
+    price: any,
   ): Promise<void> {
     if (!chatId) {
       console.error('❌ No chat ID provided');
       return;
     }
-
-
 
     try {
       const message = `

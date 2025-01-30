@@ -17,12 +17,10 @@ export class TelegramController {
   async handleWebhook(@Body() update: any, @Req() req: any) {
     // Add detailed logging of the update object
 
-
     try {
       if (update.message?.text) {
         const chatId = update.message.chat.id;
         // Add more detailed logging
-  
 
         const text = update.message.text.toLowerCase();
 
@@ -34,13 +32,9 @@ export class TelegramController {
             try {
               // Send welcome message
               await this.telegramService.handleStartCommand(193418752);
-           
 
               // Get real metrics from WebSocket service
               const metrics = this.webSocketService.getLatestMetrics();
-         
-
-             
             } catch (error) {
               console.error('❌ Error sending messages:', error);
               if (error.response) {
@@ -54,11 +48,8 @@ export class TelegramController {
           case 'metrics':
             // Get real metrics from WebSocket service
             const metrics = this.webSocketService.getLatestMetrics();
-           
 
             if (metrics) {
-          
-          
             } else {
               await this.telegramService.sendMessage(
                 chatId,
