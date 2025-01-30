@@ -90,7 +90,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
 
-            if (this.coinData[symbol].length >= 120) {
+            if (this.coinData[symbol].length >= 1200) {
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
@@ -174,5 +174,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
   getLatestMetrics(symbol: string = 'btcusdt') {
     return this.latestMetrics[symbol];
+  }
+
+  isConnected(): boolean {
+    return this.binanceWs?.readyState === WebSocket.OPEN;
   }
 }
