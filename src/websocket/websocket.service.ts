@@ -54,15 +54,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
       this.binanceWs.on('open', () => {
         console.log('✅ Connected to Binance WebSocket');
-        // this.reconnectAttempts = 0;
-
-        // const subscribeMsg = {
-        //   method: 'SUBSCRIBE',
-        //   params: this.symbols.map(symbol => `${symbol}@trade`),
-        //   id: 1
-        // };
-        // this.binanceWs.send(JSON.stringify(subscribeMsg));
-        // console.log('📨 Sent subscription message:', subscribeMsg);
       });
 
       this.binanceWs.on('message', async (data) => {
