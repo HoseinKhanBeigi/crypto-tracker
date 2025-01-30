@@ -14,10 +14,8 @@ const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 let WebSocketGatewayService = class WebSocketGatewayService {
     handleConnection(client) {
-        console.log('Client connected to WebSocket.');
     }
     handleDisconnect(client) {
-        console.log('Client disconnected from WebSocket.');
     }
     broadcast(event, payload) {
         this.server.emit(event, payload);

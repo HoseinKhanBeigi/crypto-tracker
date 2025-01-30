@@ -61,7 +61,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       .map((symbol) => `${symbol}@trade`)
       .join('/');
     const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
-    console.log(`Connecting to Binance WebSocket: ${url}`);
+    
 
     this.binanceWs = new WebSocket(url);
 
@@ -157,7 +157,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
       // Append metrics and frequency to the log file
       fs.appendFileSync(logFilePath, JSON.stringify(logData) + '\n', 'utf-8');
-      console.log(`Metrics and frequency saved to ${logFilePath}`);
+
     } catch (error) {
       console.error('Error saving metrics to file:', error.message);
     }

@@ -20,4 +20,5 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private connectToBinance;
     onModuleDestroy(): void;
     getLatestMetrics(symbol?: string): any;
+    isConnected(): boolean;
 }

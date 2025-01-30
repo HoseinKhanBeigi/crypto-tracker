@@ -16,19 +16,13 @@ export class TelegramController {
   @Post('webhook')
   async handleWebhook(@Body() update: any, @Req() req: any) {
     // Add detailed logging of the update object
-    console.log('🔍 Received webhook update:', JSON.stringify(update, null, 2));
+
 
     try {
       if (update.message?.text) {
         const chatId = update.message.chat.id;
         // Add more detailed logging
-        console.log('💬 Message details:', {
-          chatId: chatId,
-          type: typeof chatId,
-          text: update.message.text,
-          from: update.message.from,
-          chat: update.message.chat,
-        });
+  
 
         const text = update.message.text.toLowerCase();
 
@@ -40,20 +34,13 @@ export class TelegramController {
             try {
               // Send welcome message
               await this.telegramService.handleStartCommand(193418752);
-              console.log('✅ Welcome message sent successfully');
+           
 
               // Get real metrics from WebSocket service
               const metrics = this.webSocketService.getLatestMetrics();
-              console.log('📊 Got metrics:', metrics);
+         
 
-              if (metrics) {
-                await this.telegramService.sendMetricsUpdate(
-                  'btcusdt',
-                  metrics,
-                  193418752,
-                );
-                console.log('✅ Metrics sent successfully');
-              }
+             
             } catch (error) {
               console.error('❌ Error sending messages:', error);
               if (error.response) {
@@ -67,15 +54,11 @@ export class TelegramController {
           case 'metrics':
             // Get real metrics from WebSocket service
             const metrics = this.webSocketService.getLatestMetrics();
-            console.log('📊 Got metrics:', metrics);
+           
 
             if (metrics) {
-              await this.telegramService.sendMetricsUpdate(
-                'btcusdt',
-                metrics,
-                193418752,
-              );
-              console.log('✅ Metrics sent successfully');
+          
+          
             } else {
               await this.telegramService.sendMessage(
                 chatId,

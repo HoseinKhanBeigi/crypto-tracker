@@ -42,19 +42,19 @@ let WebSocketService = class WebSocketService {
         const endpoints = [
             `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
             `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
+            `wss://fstream.binance.com/stream?streams=${streamNames}`,
+            `wss://dstream.binance.com/stream?streams=${streamNames}`,
         ];
         const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
         const endpoint = endpoints[this.reconnectAttempts % endpoints.length];
-        console.log(`🔌 Connecting to Binance WebSocket: ${endpoint}`);
         try {
-            this.binanceWs = new ws_1.default(endpoint, {
+            this.binanceWs = new ws_1.default(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 },
                 timeout: 30000,
             });
             this.binanceWs.on('open', () => {
-                console.log('✅ Connected to Binance WebSocket');
             });
             this.binanceWs.on('message', async (data) => {
                 try {
@@ -76,25 +76,20 @@ let WebSocketService = class WebSocketService {
                     if (now - this.timestamps[symbol] >= 1000) {
                         this.timestamps[symbol] = now;
                         this.coinData[symbol].push(formattedPrice);
-                        if (this.coinData[symbol].length >= 20) {
+                        if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            this.latestMetrics[symbol] = metrics;
                             try {
                                 const message = `
 📊 ${symbol.toUpperCase()} Update:
 💰 Current Price: $${price}
-📈 Velocity: $${metrics.avgVelocity.toFixed(2)}
-🚀 Acceleration: $${metrics.avgAcceleration.toFixed(2)}
-💫 Jerk: $${metrics.avgJerk.toFixed(2)}
+📈 Velocity: $${metrics.avgVelocity}
 `;
-                                console.log(`📤 Sending to Telegram:`, message);
-                                await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
+                                await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752, price);
                             }
                             catch (error) {
                                 console.error(`❌ Failed to send to Telegram:`, error);
                             }
                             this.coinData[symbol] = [];
-                            console.log(`🔄 Reset data collection for ${symbol}`);
                         }
                     }
                 }
@@ -106,7 +101,6 @@ let WebSocketService = class WebSocketService {
                 console.error('❌ Binance WebSocket Error:', err.message);
                 this.reconnectAttempts++;
                 if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                    console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
                     setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
                 }
                 else {
@@ -114,9 +108,7 @@ let WebSocketService = class WebSocketService {
                 }
             });
             this.binanceWs.on('close', () => {
-                console.log('🔄 Binance WebSocket closed.');
                 if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                    console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
                     setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
                 }
             });
@@ -131,12 +123,14 @@ let WebSocketService = class WebSocketService {
     }
     onModuleDestroy() {
         if (this.binanceWs) {
-            console.log('👋 Closing Binance WebSocket connection...');
             this.binanceWs.close();
         }
     }
     getLatestMetrics(symbol = 'btcusdt') {
         return this.latestMetrics[symbol];
+    }
+    isConnected() {
+        return this.binanceWs?.readyState === ws_1.default.OPEN;
     }
 };
 exports.WebSocketService = WebSocketService;

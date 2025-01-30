@@ -7,14 +7,14 @@ export class TelegramService implements OnModuleInit {
   private readonly telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
 
   async onModuleInit() {
-    console.log('🤖 TelegramService initializing...');
+
 
     try {
       // Set up webhook
       const webhookUrl =
         'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
       await this.setWebhook(webhookUrl);
-      console.log('✅ Webhook set up successfully');
+    
     } catch (error) {
       console.error('❌ Error:', error.message);
     }
@@ -27,7 +27,7 @@ export class TelegramService implements OnModuleInit {
         url,
         allowed_updates: ['message'],
       });
-      console.log('🎯 Webhook set response:', response.data);
+
     } catch (error) {
       console.error('❌ Failed to set webhook:', error.message);
     }
@@ -43,12 +43,12 @@ export class TelegramService implements OnModuleInit {
         return;
       }
 
-      console.log(`📤 Attempting to send message to chat ${numericChatId}`);
+  
       const response = await axios.post(`${this.telegramApiUrl}/sendMessage`, {
         chat_id: numericChatId,
         text,
       });
-      console.log('✉️ Message sent successfully:', response.data);
+
     } catch (error) {
       console.error('❌ Failed to send message:', error.message);
       if (error.response) {
@@ -66,24 +66,22 @@ export class TelegramService implements OnModuleInit {
     symbol: string,
     metrics: any,
     chatId: string | number,
+    price:any
   ): Promise<void> {
     if (!chatId) {
       console.error('❌ No chat ID provided');
       return;
     }
 
+
+
     try {
       const message = `
 📊 ${symbol.toUpperCase()} Update:
-📈 Avg Velocity: $${(metrics.avgVelocity / 100).toFixed(2)}
-🚀 Avg Acceleration: $${(metrics.avgAcceleration / 100).toFixed(2)}
-💫 Avg Jerk: $${(metrics.avgJerk / 100).toFixed(2)}
-📊 Total Velocity: $${(metrics.totalVelocity / 100).toFixed(2)}
+ Current Price: $${price}
+📈 Avg Velocity: $${metrics.avgVelocity}
 `;
-
-      console.log('📤 Sending formatted message:', message);
       await this.sendMessage(193418752, message);
-      console.log('✅ Message sent successfully');
     } catch (error) {
       console.error('❌ Failed to send metrics update:', error);
       if (error.response) {
@@ -94,7 +92,6 @@ export class TelegramService implements OnModuleInit {
 
   // Modify the existing handleStartCommand to include metrics info
   async handleStartCommand(chatId: string | number): Promise<void> {
-    console.log('🎬 Handling /start command for chat:', 193418752);
     const message = `Welcome! You will receive crypto metrics updates in this chat.`;
     await this.sendMessage(193418752, message);
   }

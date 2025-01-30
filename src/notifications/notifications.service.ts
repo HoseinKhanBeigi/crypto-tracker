@@ -11,6 +11,6 @@ export class NotificationsService {
       sound: false, // Play a sound
       wait: false, // Does not wait for user interaction
     });
-    console.log(`Desktop notification sent: ${message}`);
+   
   }
 }

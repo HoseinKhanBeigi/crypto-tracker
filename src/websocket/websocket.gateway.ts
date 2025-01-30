@@ -14,11 +14,11 @@ export class WebSocketGatewayService
   server: Server;
 
   handleConnection(client: any) {
-    console.log('Client connected to WebSocket.');
+
   }
 
   handleDisconnect(client: any) {
-    console.log('Client disconnected from WebSocket.');
+  
   }
 
   broadcast(event: string, payload: any) {

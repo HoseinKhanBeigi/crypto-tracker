@@ -20,7 +20,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly notificationsService: NotificationsService,
     private readonly gateway: WebSocketGatewayService,
     private readonly telegramService: TelegramService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.connectToBinance();
@@ -41,7 +41,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
 
     const endpoint = endpoints[this.reconnectAttempts % endpoints.length];
-    console.log(`🔌 Connecting to Binance WebSocket: ${endpoint}`);
+
 
     try {
       this.binanceWs = new WebSocket(url, {
@@ -53,7 +53,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.binanceWs.on('open', () => {
-        console.log('✅ Connected to Binance WebSocket');
+
       });
 
       this.binanceWs.on('message', async (data) => {
@@ -81,33 +81,36 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.timestamps[symbol] = now;
             this.coinData[symbol].push(formattedPrice);
 
-            if (this.coinData[symbol].length >= 1200) {
+            if (this.coinData[symbol].length >= 50) {
+
+
+
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
 
-              this.latestMetrics[symbol] = metrics;
+
+              // this.latestMetrics[symbol] = metrics;
 
               try {
                 const message = `
 📊 ${symbol.toUpperCase()} Update:
 💰 Current Price: $${price}
-📈 Velocity: $${metrics.avgVelocity.toFixed(2)}
-🚀 Acceleration: $${metrics.avgAcceleration.toFixed(2)}
-💫 Jerk: $${metrics.avgJerk.toFixed(2)}
+📈 Velocity: $${metrics.avgVelocity}
 `;
-                console.log(`📤 Sending to Telegram:`, message);
+
                 await this.telegramService.sendMetricsUpdate(
                   symbol,
                   metrics,
                   193418752,
+                  price
                 );
               } catch (error) {
                 console.error(`❌ Failed to send to Telegram:`, error);
               }
 
               this.coinData[symbol] = [];
-              console.log(`🔄 Reset data collection for ${symbol}`);
+
             }
           }
         } catch (error) {
@@ -120,9 +123,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
         this.reconnectAttempts++;
 
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          console.log(
-            `🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
-          );
+
           setTimeout(
             () => this.connectToBinance(),
             5000 * this.reconnectAttempts,
@@ -133,11 +134,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.binanceWs.on('close', () => {
-        console.log('🔄 Binance WebSocket closed.');
+
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          console.log(
-            `🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
-          );
+
           setTimeout(
             () => this.connectToBinance(),
             5000 * this.reconnectAttempts,
@@ -158,7 +157,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
   onModuleDestroy() {
     if (this.binanceWs) {
-      console.log('👋 Closing Binance WebSocket connection...');
+
       this.binanceWs.close();
     }
   }

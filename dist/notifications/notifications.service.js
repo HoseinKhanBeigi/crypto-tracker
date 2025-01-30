@@ -21,7 +21,6 @@ let NotificationsService = class NotificationsService {
             sound: false,
             wait: false,
         });
-        console.log(`Desktop notification sent: ${message}`);
     }
 };
 exports.NotificationsService = NotificationsService;

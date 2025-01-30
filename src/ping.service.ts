@@ -10,7 +10,7 @@ export class PingService implements OnModuleInit {
     // setInterval(async () => {
     //   try {
     //     await axios.get(`${this.appUrl}/ping`);
-    //     console.log('🏓 Ping successful');
+    //    
     //   } catch (error) {
     //     console.error('❌ Ping failed:', error.message);
     //   }

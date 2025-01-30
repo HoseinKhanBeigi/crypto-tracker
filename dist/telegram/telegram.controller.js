@@ -26,30 +26,16 @@ let TelegramController = TelegramController_1 = class TelegramController {
         this.logger = new common_1.Logger(TelegramController_1.name);
     }
     async handleWebhook(update, req) {
-        console.log('🔍 Received webhook update:', JSON.stringify(update, null, 2));
         try {
             if (update.message?.text) {
                 const chatId = update.message.chat.id;
-                console.log('💬 Message details:', {
-                    chatId: chatId,
-                    type: typeof chatId,
-                    text: update.message.text,
-                    from: update.message.from,
-                    chat: update.message.chat
-                });
                 const text = update.message.text.toLowerCase();
                 switch (text) {
                     case '/start':
                         this.logger.log('🎬 Received /start command');
                         try {
                             await this.telegramService.handleStartCommand(193418752);
-                            console.log('✅ Welcome message sent successfully');
                             const metrics = this.webSocketService.getLatestMetrics();
-                            console.log('📊 Got metrics:', metrics);
-                            if (metrics) {
-                                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
-                                console.log('✅ Metrics sent successfully');
-                            }
                         }
                         catch (error) {
                             console.error('❌ Error sending messages:', error);
@@ -61,10 +47,7 @@ let TelegramController = TelegramController_1 = class TelegramController {
                     case '/metrics':
                     case 'metrics':
                         const metrics = this.webSocketService.getLatestMetrics();
-                        console.log('📊 Got metrics:', metrics);
                         if (metrics) {
-                            await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
-                            console.log('✅ Metrics sent successfully');
                         }
                         else {
                             await this.telegramService.sendMessage(chatId, 'No metrics available yet. Please wait a moment and try again.');
@@ -80,7 +63,7 @@ let TelegramController = TelegramController_1 = class TelegramController {
             return {
                 ok: false,
                 error: error.message,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
             };
         }
     }
