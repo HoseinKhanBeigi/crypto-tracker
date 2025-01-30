@@ -27,16 +27,16 @@ export class TelegramController {
           type: typeof chatId,
           text: update.message.text,
           from: update.message.from,
-          chat: update.message.chat
+          chat: update.message.chat,
         });
 
         const text = update.message.text.toLowerCase();
-        
-        // Handle different commands
+
+        // Handle different comm dands
         switch (text) {
           case '/start':
             this.logger.log('🎬 Received /start command');
-            
+
             try {
               // Send welcome message
               await this.telegramService.handleStartCommand(193418752);
@@ -45,9 +45,13 @@ export class TelegramController {
               // Get real metrics from WebSocket service
               const metrics = this.webSocketService.getLatestMetrics();
               console.log('📊 Got metrics:', metrics);
-              
+
               if (metrics) {
-                await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
+                await this.telegramService.sendMetricsUpdate(
+                  'btcusdt',
+                  metrics,
+                  193418752,
+                );
                 console.log('✅ Metrics sent successfully');
               }
             } catch (error) {
@@ -56,7 +60,7 @@ export class TelegramController {
                 console.error('Error response:', error.response.data);
               }
             }
-            
+
             return { ok: true, message: 'Start command and metrics sent' };
 
           case '/metrics':
@@ -64,12 +68,19 @@ export class TelegramController {
             // Get real metrics from WebSocket service
             const metrics = this.webSocketService.getLatestMetrics();
             console.log('📊 Got metrics:', metrics);
-            
+
             if (metrics) {
-              await this.telegramService.sendMetricsUpdate('btcusdt', metrics, 193418752);
+              await this.telegramService.sendMetricsUpdate(
+                'btcusdt',
+                metrics,
+                193418752,
+              );
               console.log('✅ Metrics sent successfully');
             } else {
-              await this.telegramService.sendMessage(chatId, 'No metrics available yet. Please wait a moment and try again.');
+              await this.telegramService.sendMessage(
+                chatId,
+                'No metrics available yet. Please wait a moment and try again.',
+              );
             }
             break;
         }
@@ -79,10 +90,10 @@ export class TelegramController {
       return { ok: true, message: 'Webhook received' };
     } catch (error) {
       this.logger.error('❌ Error handling webhook:', error);
-      return { 
-        ok: false, 
+      return {
+        ok: false,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }

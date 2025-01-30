@@ -32,10 +32,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       .join('/');
 
     const endpoints = [
-     `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
+      `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       `wss://stream.binance.com:9443/stream?streams=${streamNames}`,
       `wss://fstream.binance.com/stream?streams=${streamNames}`,
-      `wss://dstream.binance.com/stream?streams=${streamNames}`
+      `wss://dstream.binance.com/stream?streams=${streamNames}`,
     ];
 
     const url = `wss://stream.binance.com:9443/stream?streams=${streamNames}`;
@@ -46,7 +46,8 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     try {
       this.binanceWs = new WebSocket(endpoint, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         },
         timeout: 30000,
       });
@@ -54,7 +55,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       this.binanceWs.on('open', () => {
         console.log('✅ Connected to Binance WebSocket');
         // this.reconnectAttempts = 0;
-        
+
         // const subscribeMsg = {
         //   method: 'SUBSCRIBE',
         //   params: this.symbols.map(symbol => `${symbol}@trade`),
@@ -90,13 +91,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             this.coinData[symbol].push(formattedPrice);
 
             if (this.coinData[symbol].length >= 20) {
-      
-              
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
-              
-         
+
               this.latestMetrics[symbol] = metrics;
 
               try {
@@ -108,7 +106,11 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 💫 Jerk: $${metrics.avgJerk.toFixed(2)}
 `;
                 console.log(`📤 Sending to Telegram:`, message);
-                await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752);
+                await this.telegramService.sendMetricsUpdate(
+                  symbol,
+                  metrics,
+                  193418752,
+                );
               } catch (error) {
                 console.error(`❌ Failed to send to Telegram:`, error);
               }
@@ -125,10 +127,15 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       this.binanceWs.on('error', (err) => {
         console.error('❌ Binance WebSocket Error:', err.message);
         this.reconnectAttempts++;
-        
+
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
-          setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
+          console.log(
+            `🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+          );
+          setTimeout(
+            () => this.connectToBinance(),
+            5000 * this.reconnectAttempts,
+          );
         } else {
           console.error('❌ Max reconnection attempts reached');
         }
@@ -137,16 +144,23 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
       this.binanceWs.on('close', () => {
         console.log('🔄 Binance WebSocket closed.');
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          console.log(`🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
-          setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
+          console.log(
+            `🔄 Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+          );
+          setTimeout(
+            () => this.connectToBinance(),
+            5000 * this.reconnectAttempts,
+          );
         }
       });
-
     } catch (error) {
       console.error('❌ Failed to create WebSocket connection:', error);
       this.reconnectAttempts++;
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        setTimeout(() => this.connectToBinance(), 5000 * this.reconnectAttempts);
+        setTimeout(
+          () => this.connectToBinance(),
+          5000 * this.reconnectAttempts,
+        );
       }
     }
   }

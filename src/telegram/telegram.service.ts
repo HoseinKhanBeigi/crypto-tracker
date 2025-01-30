@@ -8,10 +8,11 @@ export class TelegramService implements OnModuleInit {
 
   async onModuleInit() {
     console.log('🤖 TelegramService initializing...');
-    
+
     try {
       // Set up webhook
-      const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
+      const webhookUrl =
+        'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
       await this.setWebhook(webhookUrl);
       console.log('✅ Webhook set up successfully');
     } catch (error) {
@@ -54,14 +55,18 @@ export class TelegramService implements OnModuleInit {
         console.error('Error response:', error.response.data);
         console.error('Request data:', {
           chat_id: chatId,
-          text: text.substring(0, 100) + '...' // Log first 100 chars of message
+          text: text.substring(0, 100) + '...', // Log first 100 chars of message
         });
       }
     }
   }
 
   // Add new method for sending metrics
-  async sendMetricsUpdate(symbol: string, metrics: any, chatId: string | number): Promise<void> {
+  async sendMetricsUpdate(
+    symbol: string,
+    metrics: any,
+    chatId: string | number,
+  ): Promise<void> {
     if (!chatId) {
       console.error('❌ No chat ID provided');
       return;
