@@ -54,8 +54,7 @@ let WebSocketService = class WebSocketService {
                 },
                 timeout: 30000,
             });
-            this.binanceWs.on('open', () => {
-            });
+            this.binanceWs.on('open', () => { });
             this.binanceWs.on('message', async (data) => {
                 try {
                     const parsed = JSON.parse(data.toString());
@@ -78,16 +77,19 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            try {
-                                const message = `
+                            console.log(metrics);
+                            if (Math.abs(metrics.avgVelocity) > 1) {
+                                try {
+                                    const message = `
 📊 ${symbol.toUpperCase()} Update:
 💰 Current Price: $${price}
 📈 Velocity: $${metrics.avgVelocity}
 `;
-                                await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752, price);
-                            }
-                            catch (error) {
-                                console.error(`❌ Failed to send to Telegram:`, error);
+                                    await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752, price);
+                                }
+                                catch (error) {
+                                    console.error(`❌ Failed to send to Telegram:`, error);
+                                }
                             }
                             this.coinData[symbol] = [];
                         }
