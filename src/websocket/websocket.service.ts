@@ -193,7 +193,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     const message = `
 📊 ${symbol.toUpperCase()} Update:
 Current Price: $${price}
-data:$${metrics.data}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
 
