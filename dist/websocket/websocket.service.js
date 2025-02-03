@@ -79,7 +79,7 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            if (Math.abs(metrics.avgVelocity) > 3) {
+                            if (Math.abs(metrics.avgVelocity) > 1) {
                                 try {
                                     await this.handlePriceUpdate(symbol, price);
                                     await this.telegramService.sendMetricsUpdate(symbol, metrics, null, price);
