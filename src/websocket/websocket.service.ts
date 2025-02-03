@@ -15,6 +15,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private latestMetrics: Record<string, any> = {};
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 5;
+  // private readonly chatIds = [193418752, 247671667];
+
+  private readonly chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
+
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -85,10 +89,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               );
 
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) > 3) {
+              if (Math.abs(metrics.avgVelocity) > 5) {
                 try {
-                  await this.handlePriceUpdate(symbol, price);
-                  await this.telegramService.sendMetricsUpdate(
+                  // await this.handlePriceUpdate(symbol, price);
+                  await this.sendMetricsUpdate(
                     symbol,
                     metrics,
                     null,
@@ -169,11 +173,36 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 📢 Signal: ${stats.tradingSignal.signal}
 `;
 
-      // Send to all chat IDs
-      const chatIds = [193418752, 247671667, 248797966,104883495,108920302,5535999915];
-      for (const chatId of chatIds) {
-        await this.telegramService.sendMessage(chatId, message);
-      }
+  
+      
+      // Use Promise.all to send messages in parallel
+      await Promise.all(
+        this.chatIds.map(chatId => this.telegramService.sendMessage(chatId, message))
+      );
     }
+  }
+
+  async sendMetricsUpdate(
+    symbol: string,
+    metrics: any,
+    _chatId: string | number,
+    price: any,
+  ): Promise<void> {
+    const message = `
+📊 ${symbol.toUpperCase()} Update:
+Current Price: $${price}
+📈 Avg Velocity: $${metrics.avgVelocity}
+`;
+
+    // Send to all chat IDs in parallel
+    await Promise.all(
+      this.chatIds.map(async (chatId) => {
+        try {
+          await this.telegramService.sendMessage(chatId, message);
+        } catch (error) {
+          console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
+        }
+      })
+    );
   }
 }

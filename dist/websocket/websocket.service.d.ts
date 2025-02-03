@@ -17,6 +17,7 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private latestMetrics;
     private reconnectAttempts;
     private readonly maxReconnectAttempts;
+    private readonly chatIds;
     constructor(metricsService: MetricsService, notificationsService: NotificationsService, gateway: WebSocketGatewayService, telegramService: TelegramService, binanceService: BinanceService);
     onModuleInit(): void;
     private connectToBinance;
@@ -24,4 +25,5 @@ export declare class WebSocketService implements OnModuleInit, OnModuleDestroy {
     getLatestMetrics(symbol?: string): any;
     isConnected(): boolean;
     private handlePriceUpdate;
+    sendMetricsUpdate(symbol: string, metrics: any, _chatId: string | number, price: any): Promise<void>;
 }

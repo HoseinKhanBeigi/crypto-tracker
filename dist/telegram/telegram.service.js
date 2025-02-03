@@ -16,7 +16,7 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-        this.chatIds = [193418752, 247671667, 248797966, 104883495];
+        this.chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
     }
     async onModuleInit() {
         try {
@@ -52,21 +52,6 @@ let TelegramService = class TelegramService {
         }
         catch (error) {
             console.error(`❌ Failed to send to ${chatId}:`, error.message);
-        }
-    }
-    async sendMetricsUpdate(symbol, metrics, _chatId, price) {
-        const message = `
-📊 ${symbol.toUpperCase()} Update:
- Current Price: $${price}
-📈 Avg Velocity: $${metrics.avgVelocity}
-`;
-        for (const chatId of this.chatIds) {
-            try {
-                await this.sendMessage(chatId, message);
-            }
-            catch (error) {
-                console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
-            }
         }
     }
     async handleStartCommand(chatId) {

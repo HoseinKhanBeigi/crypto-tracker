@@ -52,29 +52,6 @@ export class TelegramService implements OnModuleInit {
     }
   }
 
-  // Add new method for sending metrics
-  async sendMetricsUpdate(
-    symbol: string,
-    metrics: any,
-    _chatId: string | number,
-    price: any,
-  ): Promise<void> {
-    const message = `
-📊 ${symbol.toUpperCase()} Update:
- Current Price: $${price}
-📈 Avg Velocity: $${metrics.avgVelocity}
-`;
-
-    // Send to all chat IDs
-    for (const chatId of this.chatIds) {
-      try {
-        await this.sendMessage(chatId, message);
-      } catch (error) {
-        console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
-      }
-    }
-  }
-
   // Modify the existing handleStartCommand to include metrics info
   async handleStartCommand(chatId: string | number): Promise<void> {
     const message = `Welcome! You will receive crypto metrics updates in this chat.`;

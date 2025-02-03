@@ -33,6 +33,7 @@ let WebSocketService = class WebSocketService {
         this.latestMetrics = {};
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
+        this.chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
     }
     onModuleInit() {
         this.connectToBinance();
@@ -79,10 +80,9 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            if (Math.abs(metrics.avgVelocity) > 1) {
+                            if (Math.abs(metrics.avgVelocity) > 5) {
                                 try {
-                                    await this.handlePriceUpdate(symbol, price);
-                                    await this.telegramService.sendMetricsUpdate(symbol, metrics, null, price);
+                                    await this.sendMetricsUpdate(symbol, metrics, null, price);
                                 }
                                 catch (error) {
                                     console.error(`❌ Failed to send to Telegram:`, error);
@@ -143,11 +143,23 @@ let WebSocketService = class WebSocketService {
 📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
 📢 Signal: ${stats.tradingSignal.signal}
 `;
-            const chatIds = [193418752, 247671667, 248797966, 104883495];
-            for (const chatId of chatIds) {
+            await Promise.all(this.chatIds.map(chatId => this.telegramService.sendMessage(chatId, message)));
+        }
+    }
+    async sendMetricsUpdate(symbol, metrics, _chatId, price) {
+        const message = `
+📊 ${symbol.toUpperCase()} Update:
+Current Price: $${price}
+📈 Avg Velocity: $${metrics.avgVelocity}
+`;
+        await Promise.all(this.chatIds.map(async (chatId) => {
+            try {
                 await this.telegramService.sendMessage(chatId, message);
             }
-        }
+            catch (error) {
+                console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
+            }
+        }));
     }
 };
 exports.WebSocketService = WebSocketService;
