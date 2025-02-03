@@ -19,12 +19,14 @@ const metrics_service_1 = require("../metrics/metrics.service");
 const notifications_service_1 = require("../notifications/notifications.service");
 const websocket_gateway_1 = require("./websocket.gateway");
 const telegram_service_1 = require("../telegram/telegram.service");
+const binance_service_1 = require("../binance/binance.service");
 let WebSocketService = class WebSocketService {
-    constructor(metricsService, notificationsService, gateway, telegramService) {
+    constructor(metricsService, notificationsService, gateway, telegramService, binanceService) {
         this.metricsService = metricsService;
         this.notificationsService = notificationsService;
         this.gateway = gateway;
         this.telegramService = telegramService;
+        this.binanceService = binanceService;
         this.symbols = ['btcusdt'];
         this.coinData = {};
         this.timestamps = {};
@@ -77,15 +79,9 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            console.log(metrics);
-                            if (Math.abs(metrics.avgVelocity) > 1) {
+                            if (Math.abs(metrics.avgVelocity) >= 1) {
                                 try {
-                                    const message = `
-📊 ${symbol.toUpperCase()} Update:
-💰 Current Price: $${price}
-📈 Velocity: $${metrics.avgVelocity}
-`;
-                                    await this.telegramService.sendMetricsUpdate(symbol, metrics, 193418752, price);
+                                    await this.handlePriceUpdate(symbol, price);
                                 }
                                 catch (error) {
                                     console.error(`❌ Failed to send to Telegram:`, error);
@@ -134,6 +130,21 @@ let WebSocketService = class WebSocketService {
     isConnected() {
         return this.binanceWs?.readyState === ws_1.default.OPEN;
     }
+    async handlePriceUpdate(symbol, price) {
+        const stats = await this.binanceService.getStatistics();
+        if (stats.tradingSignal) {
+            const message = `
+📊 ${symbol.toUpperCase()} Analysis:
+💰 Current Price: $${price}
+📈 Drift: ${stats.drift}
+📊 Volatility: ${stats.volatility}
+🎯 Predicted Price: $${stats.tradingSignal.mostLikelyPrice.toFixed(2)}
+📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
+📢 Signal: ${stats.tradingSignal.signal}
+`;
+            console.log(message);
+        }
+    }
 };
 exports.WebSocketService = WebSocketService;
 exports.WebSocketService = WebSocketService = __decorate([
@@ -141,6 +152,7 @@ exports.WebSocketService = WebSocketService = __decorate([
     __metadata("design:paramtypes", [metrics_service_1.MetricsService,
         notifications_service_1.NotificationsService,
         websocket_gateway_1.WebSocketGatewayService,
-        telegram_service_1.TelegramService])
+        telegram_service_1.TelegramService,
+        binance_service_1.BinanceService])
 ], WebSocketService);
 //# sourceMappingURL=websocket.service.js.map

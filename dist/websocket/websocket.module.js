@@ -13,6 +13,7 @@ const websocket_service_1 = require("./websocket.service");
 const metrics_module_1 = require("../metrics/metrics.module");
 const notifications_module_1 = require("../notifications/notifications.module");
 const telegram_module_1 = require("../telegram/telegram.module");
+const binance_module_1 = require("../binance/binance.module");
 let WebSocketModule = class WebSocketModule {
 };
 exports.WebSocketModule = WebSocketModule;
@@ -21,7 +22,8 @@ exports.WebSocketModule = WebSocketModule = __decorate([
         imports: [
             metrics_module_1.MetricsModule,
             notifications_module_1.NotificationsModule,
-            (0, common_1.forwardRef)(() => telegram_module_1.TelegramModule)
+            (0, common_1.forwardRef)(() => telegram_module_1.TelegramModule),
+            binance_module_1.BinanceModule,
         ],
         providers: [websocket_gateway_1.WebSocketGatewayService, websocket_service_1.WebSocketService],
         exports: [websocket_service_1.WebSocketService],

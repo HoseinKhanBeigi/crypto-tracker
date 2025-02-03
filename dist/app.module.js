@@ -14,12 +14,14 @@ const notifications_module_1 = require("./notifications/notifications.module");
 const telegram_module_1 = require("./telegram/telegram.module");
 const ping_service_1 = require("./ping.service");
 const ping_controller_1 = require("./ping/ping.controller");
+const binance_module_1 = require("./binance/binance.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            binance_module_1.BinanceModule,
             websocket_module_1.WebSocketModule,
             metrics_module_1.MetricsModule,
             notifications_module_1.NotificationsModule,

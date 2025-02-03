@@ -4,6 +4,7 @@ import { MetricsService } from '../metrics/metrics.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from './websocket.gateway';
 import { TelegramService } from '../telegram/telegram.service';
+import { BinanceService } from '../binance/binance.service';
 
 @Injectable()
 export class WebSocketService implements OnModuleInit, OnModuleDestroy {
@@ -20,6 +21,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     private readonly notificationsService: NotificationsService,
     private readonly gateway: WebSocketGatewayService,
     private readonly telegramService: TelegramService,
+    private readonly binanceService: BinanceService,
   ) {}
 
   onModuleInit() {
@@ -81,15 +83,11 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               const metrics = this.metricsService.calculateMetrics(
                 this.coinData[symbol],
               );
-              console.log(metrics);
+
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) > 3) {
+              if (Math.abs(metrics.avgVelocity) >= 1) {
                 try {
-                  const message = `
-📊 ${symbol.toUpperCase()} Update:
-💰 Current Price: $${price}
-📈 Velocity: $${metrics.avgVelocity}
-`;
+                  await this.handlePriceUpdate(symbol, price);
                   await this.telegramService.sendMetricsUpdate(
                     symbol,
                     metrics,
@@ -155,5 +153,24 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
   isConnected(): boolean {
     return this.binanceWs?.readyState === WebSocket.OPEN;
+  }
+
+  private async handlePriceUpdate(symbol: string, price: number) {
+    const stats = await this.binanceService.getStatistics();
+    
+    if (stats.tradingSignal) {
+      const message = `
+📊 ${symbol.toUpperCase()} Analysis:
+💰 Current Price: $${price}
+📈 Drift: ${stats.drift}
+📊 Volatility: ${stats.volatility}
+🎯 Predicted Price: $${stats.tradingSignal.mostLikelyPrice.toFixed(2)}
+📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
+📢 Signal: ${stats.tradingSignal.signal}
+`;
+
+   
+      await this.telegramService.sendMessage(193418752, message);
+    }
   }
 }
