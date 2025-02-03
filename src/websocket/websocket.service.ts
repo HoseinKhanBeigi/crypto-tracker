@@ -91,7 +91,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
             
 
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) > 3) {
+              if (Math.abs(metrics.avgVelocity) > 2) {
                 try {
                   // await this.handlePriceUpdate(symbol, price);
                   await this.sendMetricsUpdate(
