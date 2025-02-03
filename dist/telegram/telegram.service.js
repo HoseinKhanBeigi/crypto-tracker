@@ -16,7 +16,7 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-        this.chatIds = [193418752, 247671667, 248797966];
+        this.chatIds = [193418752, 247671667, 248797966, 104883495];
     }
     async onModuleInit() {
         try {

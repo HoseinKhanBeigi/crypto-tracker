@@ -143,7 +143,7 @@ let WebSocketService = class WebSocketService {
 📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
 📢 Signal: ${stats.tradingSignal.signal}
 `;
-            const chatIds = [193418752, 247671667, 248797966];
+            const chatIds = [193418752, 247671667, 248797966, 104883495];
             for (const chatId of chatIds) {
                 await this.telegramService.sendMessage(chatId, message);
             }

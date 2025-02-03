@@ -170,7 +170,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 `;
 
       // Send to all chat IDs
-      const chatIds = [193418752, 247671667, 248797966];
+      const chatIds = [193418752, 247671667, 248797966,104883495];
       for (const chatId of chatIds) {
         await this.telegramService.sendMessage(chatId, message);
       }
