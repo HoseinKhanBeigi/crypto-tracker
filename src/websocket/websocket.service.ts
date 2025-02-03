@@ -88,8 +88,10 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
                 this.coinData[symbol],
               );
 
+            
+
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) > 5) {
+              if (Math.abs(metrics.avgVelocity) > 3) {
                 try {
                   // await this.handlePriceUpdate(symbol, price);
                   await this.sendMetricsUpdate(
@@ -191,6 +193,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
     const message = `
 📊 ${symbol.toUpperCase()} Update:
 Current Price: $${price}
+data:$${metrics.data}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
 

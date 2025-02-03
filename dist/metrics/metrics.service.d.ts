@@ -1,5 +1,6 @@
 export declare class MetricsService {
     calculateMetrics(data: number[], dt?: number): {
+        data: number[];
         avgVelocity: number;
         avgAcceleration: number;
         avgJerk: number;

@@ -41,6 +41,7 @@ let MetricsService = class MetricsService {
         const avgAcceleration = totalAcceleration / accelerations.length || 0;
         const avgJerk = totalJerk / jerks.length || 0;
         return {
+            data,
             avgVelocity,
             avgAcceleration,
             avgJerk,

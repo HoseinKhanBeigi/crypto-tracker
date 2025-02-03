@@ -38,6 +38,7 @@ export class MetricsService {
     const avgJerk = totalJerk / jerks.length || 0;
 
     return {
+      data,
       avgVelocity,
       avgAcceleration,
       avgJerk,

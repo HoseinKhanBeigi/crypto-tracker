@@ -80,7 +80,7 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            if (Math.abs(metrics.avgVelocity) > 5) {
+                            if (Math.abs(metrics.avgVelocity) > 3) {
                                 try {
                                     await this.sendMetricsUpdate(symbol, metrics, null, price);
                                 }
@@ -150,6 +150,7 @@ let WebSocketService = class WebSocketService {
         const message = `
 📊 ${symbol.toUpperCase()} Update:
 Current Price: $${price}
+data:$${metrics.data}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
         await Promise.all(this.chatIds.map(async (chatId) => {
