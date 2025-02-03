@@ -16,6 +16,7 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
+        this.chatIds = [193418752, 247671667, 248797966];
     }
     async onModuleInit() {
         try {
@@ -28,7 +29,7 @@ let TelegramService = class TelegramService {
     }
     async setWebhook(url) {
         try {
-            const response = await axios_1.default.post(`${this.telegramApiUrl}/setWebhook`, {
+            await axios_1.default.post(`${this.telegramApiUrl}/setWebhook`, {
                 url,
                 allowed_updates: ['message'],
             });
@@ -44,45 +45,35 @@ let TelegramService = class TelegramService {
                 console.error('❌ Invalid chat ID:', chatId);
                 return;
             }
-            const response = await axios_1.default.post(`${this.telegramApiUrl}/sendMessage`, {
+            await axios_1.default.post(`${this.telegramApiUrl}/sendMessage`, {
                 chat_id: numericChatId,
                 text,
             });
         }
         catch (error) {
-            console.error('❌ Failed to send message:', error.message);
-            if (error.response) {
-                console.error('Error response:', error.response.data);
-                console.error('Request data:', {
-                    chat_id: chatId,
-                    text: text.substring(0, 100) + '...',
-                });
-            }
+            console.error(`❌ Failed to send to ${chatId}:`, error.message);
         }
     }
-    async sendMetricsUpdate(symbol, metrics, chatId, price) {
-        if (!chatId) {
-            console.error('❌ No chat ID provided');
-            return;
-        }
-        try {
-            const message = `
+    async sendMetricsUpdate(symbol, metrics, _chatId, price) {
+        const message = `
 📊 ${symbol.toUpperCase()} Update:
  Current Price: $${price}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
-            await this.sendMessage(193418752, message);
-        }
-        catch (error) {
-            console.error('❌ Failed to send metrics update:', error);
-            if (error.response) {
-                console.error('Error response:', error.response.data);
+        for (const chatId of this.chatIds) {
+            try {
+                await this.sendMessage(chatId, message);
+            }
+            catch (error) {
+                console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
             }
         }
     }
     async handleStartCommand(chatId) {
         const message = `Welcome! You will receive crypto metrics updates in this chat.`;
-        await this.sendMessage(193418752, message);
+        for (const id of this.chatIds) {
+            await this.sendMessage(id, message);
+        }
     }
 };
 exports.TelegramService = TelegramService;

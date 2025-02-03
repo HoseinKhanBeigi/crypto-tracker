@@ -20,6 +20,7 @@ export class TelegramController {
     try {
       if (update.message?.text) {
         const chatId = update.message.chat.id;
+        console.log(chatId,"chatId");
         // Add more detailed logging
 
         const text = update.message.text.toLowerCase();

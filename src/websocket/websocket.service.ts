@@ -85,13 +85,13 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               );
 
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) >= 3) {
+              if (Math.abs(metrics.avgVelocity) > 3) {
                 try {
                   await this.handlePriceUpdate(symbol, price);
                   await this.telegramService.sendMetricsUpdate(
                     symbol,
                     metrics,
-                    193418752,
+                    null,
                     price,
                   );
                 } catch (error) {
@@ -169,7 +169,11 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 📢 Signal: ${stats.tradingSignal.signal}
 `;
 
-      await this.telegramService.sendMessage(193418752, message);
+      // Send to all chat IDs
+      const chatIds = [193418752, 247671667, 248797966];
+      for (const chatId of chatIds) {
+        await this.telegramService.sendMessage(chatId, message);
+      }
     }
   }
 }

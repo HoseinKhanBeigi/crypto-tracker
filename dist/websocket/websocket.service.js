@@ -79,9 +79,10 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            if (Math.abs(metrics.avgVelocity) >= 1) {
+                            if (Math.abs(metrics.avgVelocity) > 3) {
                                 try {
                                     await this.handlePriceUpdate(symbol, price);
+                                    await this.telegramService.sendMetricsUpdate(symbol, metrics, null, price);
                                 }
                                 catch (error) {
                                     console.error(`❌ Failed to send to Telegram:`, error);
@@ -142,7 +143,10 @@ let WebSocketService = class WebSocketService {
 📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
 📢 Signal: ${stats.tradingSignal.signal}
 `;
-            console.log(message);
+            const chatIds = [193418752, 247671667, 248797966];
+            for (const chatId of chatIds) {
+                await this.telegramService.sendMessage(chatId, message);
+            }
         }
     }
 };

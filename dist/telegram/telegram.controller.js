@@ -29,6 +29,7 @@ let TelegramController = TelegramController_1 = class TelegramController {
         try {
             if (update.message?.text) {
                 const chatId = update.message.chat.id;
+                console.log(chatId, "chatId");
                 const text = update.message.text.toLowerCase();
                 switch (text) {
                     case '/start':
