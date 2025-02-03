@@ -85,7 +85,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
               );
 
               // Only send message if velocity is significant
-              if (Math.abs(metrics.avgVelocity) >= 1) {
+              if (Math.abs(metrics.avgVelocity) >= 3) {
                 try {
                   await this.handlePriceUpdate(symbol, price);
                   await this.telegramService.sendMetricsUpdate(
@@ -157,7 +157,7 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 
   private async handlePriceUpdate(symbol: string, price: number) {
     const stats = await this.binanceService.getStatistics();
-    
+
     if (stats.tradingSignal) {
       const message = `
 📊 ${symbol.toUpperCase()} Analysis:
@@ -169,7 +169,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 📢 Signal: ${stats.tradingSignal.signal}
 `;
 
-   
       await this.telegramService.sendMessage(193418752, message);
     }
   }
