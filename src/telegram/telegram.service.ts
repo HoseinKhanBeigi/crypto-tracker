@@ -5,13 +5,15 @@ import axios from 'axios';
 export class TelegramService implements OnModuleInit {
   private readonly botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU'; // Your BotFather token
   private readonly telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-  private readonly chatIds = [193418752, 247671667, 248797966,104883495,108920302,5535999915]; // All chat IDs
+  private readonly chatIds = [
+    193418752, 247671667, 248797966, 104883495, 108920302, 5535999915,
+  ]; // All chat IDs
 
   async onModuleInit() {
     try {
       // Set up webhook
       const webhookUrl =
-        'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
+        'https://real-time-cryptoprise.vercel.app/telegram/webhook';
       await this.setWebhook(webhookUrl);
     } catch (error) {
       console.error('❌ Error:', error.message);
