@@ -89,8 +89,6 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
                 this.coinData[symbol],
               );
 
-              console.log(metrics, 'metrics');
-
               // Only send message if velocity is significant
               if (Math.abs(metrics.avgVelocity) > 2) {
                 try {
