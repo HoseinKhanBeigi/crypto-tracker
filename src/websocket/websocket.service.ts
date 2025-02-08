@@ -17,8 +17,9 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
   private readonly maxReconnectAttempts = 5;
   // private readonly chatIds = [193418752, 247671667];
 
-  private readonly chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
-
+  private readonly chatIds = [
+    193418752, 247671667, 248797966, 104883495, 108920302, 5535999915,
+  ];
 
   constructor(
     private readonly metricsService: MetricsService,
@@ -88,18 +89,13 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
                 this.coinData[symbol],
               );
 
-            
+              console.log(metrics, 'metrics');
 
               // Only send message if velocity is significant
               if (Math.abs(metrics.avgVelocity) > 2) {
                 try {
                   // await this.handlePriceUpdate(symbol, price);
-                  await this.sendMetricsUpdate(
-                    symbol,
-                    metrics,
-                    null,
-                    price,
-                  );
+                  await this.sendMetricsUpdate(symbol, metrics, null, price);
                 } catch (error) {
                   console.error(`❌ Failed to send to Telegram:`, error);
                 }
@@ -175,11 +171,13 @@ export class WebSocketService implements OnModuleInit, OnModuleDestroy {
 📢 Signal: ${stats.tradingSignal.signal}
 `;
 
-  
-      
+      console.log(message);
+
       // Use Promise.all to send messages in parallel
       await Promise.all(
-        this.chatIds.map(chatId => this.telegramService.sendMessage(chatId, message))
+        this.chatIds.map((chatId) =>
+          this.telegramService.sendMessage(chatId, message),
+        ),
       );
     }
   }
@@ -196,6 +194,8 @@ Current Price: $${price}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
 
+    console.log(message, 'message');
+
     // Send to all chat IDs in parallel
     await Promise.all(
       this.chatIds.map(async (chatId) => {
@@ -204,7 +204,7 @@ Current Price: $${price}
         } catch (error) {
           console.error(`❌ Failed to send to chat ${chatId}:`, error.message);
         }
-      })
+      }),
     );
   }
 }

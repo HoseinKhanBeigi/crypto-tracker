@@ -16,11 +16,13 @@ let TelegramService = class TelegramService {
     constructor() {
         this.botToken = '7909173256:AAF9M8mc0QYmtO9SUYQPv6XkrPkAz2P_ImU';
         this.telegramApiUrl = `https://api.telegram.org/bot${this.botToken}`;
-        this.chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
+        this.chatIds = [
+            193418752, 247671667, 248797966, 104883495, 108920302, 5535999915,
+        ];
     }
     async onModuleInit() {
         try {
-            const webhookUrl = 'https://crypto-tracker-git-main-hoseinkhanbeigis-projects.vercel.app/telegram/webhook';
+            const webhookUrl = 'https://real-time-cryptoprise.vercel.app/telegram/webhook';
             await this.setWebhook(webhookUrl);
         }
         catch (error) {

@@ -33,7 +33,9 @@ let WebSocketService = class WebSocketService {
         this.latestMetrics = {};
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
-        this.chatIds = [193418752, 247671667, 248797966, 104883495, 108920302, 5535999915];
+        this.chatIds = [
+            193418752, 247671667, 248797966, 104883495, 108920302, 5535999915,
+        ];
     }
     onModuleInit() {
         this.connectToBinance();
@@ -80,7 +82,7 @@ let WebSocketService = class WebSocketService {
                         this.coinData[symbol].push(formattedPrice);
                         if (this.coinData[symbol].length >= 50) {
                             const metrics = this.metricsService.calculateMetrics(this.coinData[symbol]);
-                            if (Math.abs(metrics.avgVelocity) > 3) {
+                            if (Math.abs(metrics.avgVelocity) > 2) {
                                 try {
                                     await this.sendMetricsUpdate(symbol, metrics, null, price);
                                 }
@@ -143,16 +145,17 @@ let WebSocketService = class WebSocketService {
 📈 Probability: ${stats.tradingSignal.probability.toFixed(2)}%
 📢 Signal: ${stats.tradingSignal.signal}
 `;
-            await Promise.all(this.chatIds.map(chatId => this.telegramService.sendMessage(chatId, message)));
+            console.log(message);
+            await Promise.all(this.chatIds.map((chatId) => this.telegramService.sendMessage(chatId, message)));
         }
     }
     async sendMetricsUpdate(symbol, metrics, _chatId, price) {
         const message = `
 📊 ${symbol.toUpperCase()} Update:
 Current Price: $${price}
-data:$${metrics.data}
 📈 Avg Velocity: $${metrics.avgVelocity}
 `;
+        console.log(message, 'message');
         await Promise.all(this.chatIds.map(async (chatId) => {
             try {
                 await this.telegramService.sendMessage(chatId, message);
